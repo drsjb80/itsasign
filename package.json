@@ -1,0 +1,28 @@
+{
+  "name": "itsasign",
+  "version": "1.0.0",
+  "description": "A FOSS digital signage app",
+  "keywords": [
+    "digital",
+    "signage"
+  ],
+  "homepage": "https://github.com/drsjb80/itsasign#readme",
+  "bugs": {
+    "url": "https://github.com/drsjb80/itsasign/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/drsjb80/itsasign.git"
+  },
+  "license": "ISC",
+  "author": "Steve Beaty",
+  "type": "commonjs",
+  "main": "index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "cors-anywhere": "^0.4.4",
+    "concurrency": "^0.1.4"
+  }
+}
