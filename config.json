@@ -1,0 +1,81 @@
+{
+  "rss": {
+    "proxy": "http://localhost:8080/"
+  },
+  "layout": {
+    "columns": "2fr 1fr",
+    "rows": "1fr"
+  },
+  "panels": [
+    {
+      "title": "Main",
+      "gridArea": "1 / 1 / 2 / 2",
+      "widgets": [
+        {
+          "type": "playlist",
+          "title": "Content Loop",
+          "defaultImageDurationMs": 10000,
+          "defaultRssItemsPerPage": 3,
+          "defaultRssPageDurationMs": 7000,
+          "defaultRssMaxItems": 12,
+          "items": [
+            {
+              "type": "image",
+              "title": "Campus Photo",
+              "src": "images/photo1.jpg",
+              "durationMs": 8000,
+              "fit": "cover"
+            },
+            {
+              "type": "rss-feed",
+              "title": "BBC News",
+              "url": "https://feeds.bbci.co.uk/news/rss.xml",
+              "itemsPerPage": 3,
+              "pageDurationMs": 7000,
+              "maxItems": 9,
+              "showQr": true
+            },
+            {
+              "type": "image",
+              "title": "Poster",
+              "src": "images/poster.jpg",
+              "durationMs": 12000,
+              "fit": "contain"
+            },
+            {
+              "type": "rss-feed",
+              "title": "NYTimes Home",
+              "url": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml",
+              "itemsPerPage": 2,
+              "pageDurationMs": 8000,
+              "maxItems": 8,
+              "showQr": true,
+              "proxy": "http://localhost:8080/"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Sidebar",
+      "gridArea": "1 / 2 / 2 / 3",
+      "widgets": [
+        {
+          "type": "time",
+          "title": "Time",
+          "timeZone": "America/Denver",
+          "locale": "en-US"
+        },
+        {
+          "type": "weather",
+          "title": "Weather",
+          "latitude": 39.7392,
+          "longitude": -104.9903,
+          "units": "fahrenheit",
+          "refreshMs": 600000
+        }
+      ]
+    }
+  ]
+}
+
