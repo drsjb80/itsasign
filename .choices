@@ -1,0 +1,1 @@
+concurrency 'npx serve' 'node cors-anywhere'
