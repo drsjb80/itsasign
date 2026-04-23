@@ -1,0 +1,602 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Digital Signage</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #f8fafc;
+      --muted: #cbd5e1;
+      --gap: 12px;
+      --radius: 12px;
+    }
+
+    * { box-sizing: border-box; }
+    html, body {
+      margin: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    #app {
+      width: 100vw;
+      height: 100vh;
+      display: grid;
+      gap: var(--gap);
+      padding: var(--gap);
+    }
+
+    .panel {
+      min-height: 0;
+      display: flex;
+      flex-direction: column;
+      background: var(--panel);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 10px 14px;
+      font-weight: bold;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .panel-body {
+      flex: 1;
+      min-height: 0;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .widget-card {
+      background: var(--panel-2);
+      border-radius: 10px;
+      padding: 12px;
+    }
+
+    .widget-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .meta-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      margin-bottom: 10px;
+    }
+
+    .time-value {
+      font-size: 3rem;
+      line-height: 1;
+      font-weight: bold;
+      margin-top: 6px;
+    }
+
+    .time-date, .weather-meta, .rss-date {
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    .weather-temp {
+      font-size: 2.3rem;
+      font-weight: bold;
+      margin-top: 6px;
+    }
+
+    .playlist-stage {
+      min-height: 0;
+      flex: 1;
+      background: #000;
+      border-radius: 10px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+    }
+
+    .playlist-slide {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      background: #000;
+    }
+
+    .playlist-image {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+      background: #000;
+    }
+
+    .rss-slide {
+      background: #111827;
+      color: var(--text);
+      height: 100%;
+      padding: 16px;
+      display: grid;
+      grid-template-columns: 1fr 130px;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .rss-main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .rss-feed-title {
+      font-size: 1.2rem;
+      font-weight: bold;
+      margin-bottom: 4px;
+    }
+
+    .rss-feed-url {
+      color: var(--muted);
+      font-size: 0.85rem;
+      word-break: break-all;
+      margin-bottom: 12px;
+    }
+
+    .rss-items {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow: hidden;
+    }
+
+    .rss-item {
+      padding-bottom: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .rss-item:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .rss-title {
+      font-weight: bold;
+      line-height: 1.25;
+      margin-bottom: 6px;
+    }
+
+    .rss-qr-wrap {
+      background: white;
+      border-radius: 8px;
+      padding: 8px;
+      align-self: start;
+    }
+
+    .rss-qr-wrap img {
+      width: 100%;
+      display: block;
+    }
+
+    .rss-qr-label {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-top: 8px;
+      text-align: center;
+    }
+
+    .error {
+      color: #fecaca;
+      padding: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script>
+    let APP_CONFIG = null;
+
+    async function main() {
+      APP_CONFIG = await loadJson('config.json');
+      renderApp(APP_CONFIG);
+    }
+
+    async function loadJson(path) {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Could not load ${path}`);
+      }
+      return response.json();
+    }
+
+    function renderApp(config) {
+      const app = document.getElementById('app');
+      app.style.gridTemplateColumns = config.layout?.columns || '2fr 1fr';
+      app.style.gridTemplateRows = config.layout?.rows || '1fr';
+
+      for (const panel of config.panels || []) {
+        const panelEl = document.createElement('section');
+        panelEl.className = 'panel';
+        if (panel.gridArea) panelEl.style.gridArea = panel.gridArea;
+
+        if (panel.title) {
+          const header = document.createElement('div');
+          header.className = 'panel-header';
+          header.textContent = panel.title;
+          panelEl.appendChild(header);
+        }
+
+        const body = document.createElement('div');
+        body.className = 'panel-body';
+        panelEl.appendChild(body);
+
+        for (const widget of panel.widgets || []) {
+          body.appendChild(createWidget(widget, config));
+        }
+
+        app.appendChild(panelEl);
+      }
+    }
+
+    function createWidget(widget, config) {
+      switch (widget.type) {
+        case 'time':
+          return createTimeWidget(widget);
+        case 'weather':
+          return createWeatherWidget(widget);
+        case 'playlist':
+          return createPlaylistWidget(widget, config);
+        default:
+          return createUnknownWidget(widget);
+      }
+    }
+
+    function createCard(title) {
+      const card = document.createElement('div');
+      card.className = 'widget-card';
+
+      if (title) {
+        const h = document.createElement('div');
+        h.className = 'widget-title';
+        h.textContent = title;
+        card.appendChild(h);
+      }
+
+      return card;
+    }
+
+    function createTimeWidget(widget) {
+      const el = createCard(widget.title || 'Time');
+      const timeEl = document.createElement('div');
+      timeEl.className = 'time-value';
+      const dateEl = document.createElement('div');
+      dateEl.className = 'time-date';
+      el.append(timeEl, dateEl);
+
+      const timeZone = widget.timeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const locale = widget.locale || 'en-US';
+
+      function update() {
+        const now = new Date();
+        timeEl.textContent = new Intl.DateTimeFormat(locale, {
+          timeZone,
+          hour: 'numeric',
+          minute: '2-digit',
+          second: '2-digit'
+        }).format(now);
+
+        dateEl.textContent = new Intl.DateTimeFormat(locale, {
+          timeZone,
+          weekday: 'long',
+          month: 'long',
+          day: 'numeric',
+          year: 'numeric'
+        }).format(now);
+      }
+
+      update();
+      setInterval(update, 1000);
+      return el;
+    }
+
+    function createWeatherWidget(widget) {
+      const el = createCard(widget.title || 'Weather');
+      const temp = document.createElement('div');
+      temp.className = 'weather-temp';
+      temp.textContent = '--°';
+      const meta = document.createElement('div');
+      meta.className = 'weather-meta';
+      meta.textContent = 'Loading weather...';
+      el.append(temp, meta);
+
+      const lat = widget.latitude;
+      const lon = widget.longitude;
+      const units = widget.units || 'fahrenheit';
+
+      if (lat == null || lon == null) {
+        meta.textContent = 'Missing latitude/longitude in config';
+        return el;
+      }
+
+      async function load() {
+        try {
+          const url = new URL('https://api.open-meteo.com/v1/forecast');
+          url.searchParams.set('latitude', lat);
+          url.searchParams.set('longitude', lon);
+          url.searchParams.set('current', 'temperature_2m,weather_code');
+          url.searchParams.set('temperature_unit', units === 'celsius' ? 'celsius' : 'fahrenheit');
+          url.searchParams.set('timezone', 'auto');
+          const response = await fetch(url);
+          const data = await response.json();
+          temp.textContent = `${Math.round(data.current.temperature_2m)}°`;
+          meta.textContent = weatherCodeToText(data.current.weather_code);
+        } catch (error) {
+          meta.textContent = 'Weather unavailable';
+        }
+      }
+
+      load();
+      setInterval(load, widget.refreshMs || 600000);
+      return el;
+    }
+
+    function createPlaylistWidget(widget, config) {
+      const el = createCard(widget.title || 'Playlist');
+
+      const meta = document.createElement('div');
+      meta.className = 'meta-row';
+      meta.innerHTML = '<span>Loading playlist...</span><span></span>';
+
+      const stage = document.createElement('div');
+      stage.className = 'playlist-stage';
+
+      el.append(meta, stage);
+
+      const items = Array.isArray(widget.items) ? widget.items : [];
+      if (!items.length) {
+        stage.innerHTML = '<div class="error">No playlist items configured</div>';
+        return el;
+      }
+
+      let itemIndex = 0;
+
+      async function playNext() {
+        const item = items[itemIndex];
+        const left = `${itemIndex + 1} / ${items.length}`;
+        const right = item.type === 'rss-feed' ? 'RSS' : item.type === 'image' ? 'Image' : item.type;
+        meta.innerHTML = `<span>${escapeHtml(left)}</span><span>${escapeHtml(right)}</span>`;
+
+        if (item.type === 'image') {
+          const duration = item.durationMs || widget.defaultImageDurationMs || 10000;
+          showImageSlide(stage, item);
+          itemIndex = (itemIndex + 1) % items.length;
+          setTimeout(playNext, duration);
+          return;
+        }
+
+        if (item.type === 'rss-feed') {
+          await playRssFeed(stage, item, widget, config);
+          itemIndex = (itemIndex + 1) % items.length;
+          setTimeout(playNext, 25);
+          return;
+        }
+
+        stage.innerHTML = `<div class="error">Unknown playlist item type: ${escapeHtml(item.type || '')}</div>`;
+        itemIndex = (itemIndex + 1) % items.length;
+        setTimeout(playNext, 3000);
+      }
+
+      playNext();
+      return el;
+    }
+
+    function showImageSlide(stage, item) {
+      stage.innerHTML = '';
+      const slide = document.createElement('div');
+      slide.className = 'playlist-slide';
+
+      const img = document.createElement('img');
+      img.className = 'playlist-image';
+      img.src = item.src;
+      img.alt = item.title || '';
+      if (item.fit === 'contain') {
+        img.style.objectFit = 'contain';
+      }
+
+      slide.appendChild(img);
+      stage.appendChild(slide);
+    }
+
+    async function playRssFeed(stage, item, widget, config) {
+      const feedUrl = item.url;
+      const pageSize = item.itemsPerPage || widget.defaultRssItemsPerPage || 3;
+      const pageDurationMs = item.pageDurationMs || widget.defaultRssPageDurationMs || 7000;
+
+      let feed;
+      try {
+        feed = await fetchFeed(feedUrl, item, config);
+      } catch (error) {
+        stage.innerHTML = `<div class="error">Could not load feed: ${escapeHtml(feedUrl)}</div>`;
+        await wait(2500);
+        return;
+      }
+
+      const allItems = (feed.items || []).slice(0, item.maxItems || widget.defaultRssMaxItems || 12);
+      if (!allItems.length) {
+        stage.innerHTML = `<div class="error">No items in feed: ${escapeHtml(feedUrl)}</div>`;
+        await wait(2500);
+        return;
+      }
+
+      for (let start = 0; start < allItems.length; start += pageSize) {
+        const pageItems = allItems.slice(start, start + pageSize);
+        showRssPage(stage, {
+          title: item.title || feed.feed?.title || 'RSS Feed',
+          url: feedUrl,
+          items: pageItems,
+          showQr: item.showQr !== false,
+          qrSize: item.qrSize || 120
+        });
+        await wait(pageDurationMs);
+      }
+    }
+
+    function showRssPage(stage, data) {
+      stage.innerHTML = '';
+
+      const slide = document.createElement('div');
+      slide.className = 'playlist-slide rss-slide';
+
+      const main = document.createElement('div');
+      main.className = 'rss-main';
+
+      const title = document.createElement('div');
+      title.className = 'rss-feed-title';
+      title.textContent = data.title;
+
+      const url = document.createElement('div');
+      url.className = 'rss-feed-url';
+      url.textContent = data.url;
+
+      const itemsEl = document.createElement('div');
+      itemsEl.className = 'rss-items';
+
+      for (const item of data.items) {
+        const row = document.createElement('div');
+        row.className = 'rss-item';
+
+        const h = document.createElement('div');
+        h.className = 'rss-title';
+        h.textContent = item.title || '(untitled)';
+
+        const d = document.createElement('div');
+        d.className = 'rss-date';
+        d.textContent = item.pubDate || '';
+
+        row.append(h, d);
+        itemsEl.appendChild(row);
+      }
+
+      main.append(title, url, itemsEl);
+      slide.appendChild(main);
+
+      if (data.showQr) {
+        const qrWrap = document.createElement('div');
+        qrWrap.className = 'rss-qr-wrap';
+
+        const qr = document.createElement('img');
+        qr.alt = 'QR code';
+        qr.src = buildQrUrl(data.url, data.qrSize);
+
+        const label = document.createElement('div');
+        label.className = 'rss-qr-label';
+        label.textContent = 'Scan feed';
+
+        qrWrap.append(qr, label);
+        slide.appendChild(qrWrap);
+      }
+
+      stage.appendChild(slide);
+    }
+
+    async function fetchFeed(feedUrl, item = {}, config = {}) {
+      const proxy = item.proxy !== undefined ? item.proxy : (config.rss?.proxy || null);
+      const finalUrl = proxy ? proxy + feedUrl : feedUrl;
+
+      const response = await fetch(finalUrl);
+      if (!response.ok) {
+        throw new Error(`Feed fetch failed: ${finalUrl}`);
+      }
+
+      const xmlText = await response.text();
+      return parseRssXml(xmlText, feedUrl);
+    }
+
+    function parseRssXml(xmlText, fallbackUrl = '') {
+      const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+      const parserError = doc.querySelector('parsererror');
+      if (parserError) {
+        throw new Error(`Invalid RSS/XML from ${fallbackUrl}`);
+      }
+
+      const channel = doc.querySelector('channel');
+      const feedTitle = channel?.querySelector('title')?.textContent?.trim() || 'RSS Feed';
+      const feedLink = channel?.querySelector('link')?.textContent?.trim() || fallbackUrl;
+      const feedDescription = channel?.querySelector('description')?.textContent?.trim() || '';
+
+      const items = [...doc.querySelectorAll('item')].map(item => ({
+        title: item.querySelector('title')?.textContent?.trim() || '(untitled)',
+        link: item.querySelector('link')?.textContent?.trim() || '',
+        pubDate: item.querySelector('pubDate')?.textContent?.trim() || '',
+        contentSnippet: item.querySelector('description')?.textContent?.trim() || ''
+      }));
+
+      return {
+        feed: {
+          title: feedTitle,
+          link: feedLink,
+          description: feedDescription
+        },
+        items
+      };
+    }
+
+    function buildQrUrl(value, size = 120) {
+      return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}`;
+    }
+
+    function createUnknownWidget(widget) {
+      const el = createCard(widget.title || widget.type || 'Unknown');
+      const msg = document.createElement('div');
+      msg.className = 'error';
+      msg.textContent = `Unknown widget type: ${widget.type}`;
+      el.appendChild(msg);
+      return el;
+    }
+
+    function weatherCodeToText(code) {
+      const map = {
+        0: 'Clear',
+        1: 'Mostly clear',
+        2: 'Partly cloudy',
+        3: 'Overcast',
+        45: 'Fog',
+        51: 'Light drizzle',
+        61: 'Light rain',
+        63: 'Rain',
+        71: 'Snow',
+        80: 'Showers',
+        95: 'Thunderstorm'
+      };
+      return map[code] || `Code ${code}`;
+    }
+
+    function wait(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text || '';
+      return div.innerHTML;
+    }
+
+    main().catch(error => {
+      document.getElementById('app').innerHTML = `<pre style="padding:16px;white-space:pre-wrap;">${escapeHtml(error.message)}</pre>`;
+      console.error(error);
+    });
+  </script>
+</body>
+</html>
