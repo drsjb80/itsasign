@@ -1,1 +1,2 @@
-concurrency 'npx serve' 'node cors-anywhere'
+npm install
+node_modules/.bin/concurrently 'npx serve' 'node cors-anywhere'

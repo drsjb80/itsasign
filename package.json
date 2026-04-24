@@ -23,6 +23,6 @@
   },
   "dependencies": {
     "cors-anywhere": "^0.4.4",
-    "concurrency": "^0.1.4"
+    "concurrently": "^9.2.1"
   }
 }
