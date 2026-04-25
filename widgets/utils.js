@@ -21,3 +21,21 @@ export function escapeHtml(text) {
   div.textContent = text || '';
   return div.innerHTML;
 }
+
+export function reportWidgetError({ widgetType, message, error = null, target = null, asHtml = false }) {
+  const prefix = widgetType ? `[${widgetType}]` : '[widget]';
+  if (error) {
+    console.error(`${prefix} ${message}`, error);
+  } else {
+    console.error(`${prefix} ${message}`);
+  }
+
+  if (!target) return;
+
+  if (asHtml) {
+    target.innerHTML = `<div class="error">${escapeHtml(message)}</div>`;
+    return;
+  }
+
+  target.textContent = message;
+}

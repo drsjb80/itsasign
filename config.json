@@ -2,7 +2,8 @@
   "plugins": [
     "./widgets/clock.js",
     "./widgets/weather.js",
-    "./widgets/playlist.js"
+    "./widgets/playlist.js",
+    "./widgets/xkcd.js"
   ],
   "rss": {
     "proxy": "http://localhost:8080/"
@@ -27,7 +28,7 @@
             {
               "type": "image",
               "title": "Toby",
-              "src": "images/Toby.png",
+              "src": "http://sites.msudenver.edu/beatys/wp-content/uploads/sites/461/2026/04/Toby-scaled.png",
               "durationMs": 8000,
               "fit": "cover"
             },
@@ -69,6 +70,11 @@
           "longitude": -104.9903,
           "units": "fahrenheit",
           "refreshMs": 600000
+        },
+        {
+          "type": "xkcd",
+          "title": "XKCD",
+          "refreshMs": 3600000
         }
       ]
     }

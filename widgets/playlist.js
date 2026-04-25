@@ -1,4 +1,4 @@
-import { createCard, wait, escapeHtml } from './utils.js';
+import { createCard, wait, escapeHtml, reportWidgetError } from './utils.js';
 
 export const type = 'playlist';
 
@@ -16,7 +16,12 @@ export function create(widget, config) {
 
   const items = Array.isArray(widget.items) ? widget.items : [];
   if (!items.length) {
-    stage.innerHTML = '<div class="error">No playlist items configured</div>';
+    reportWidgetError({
+      widgetType: type,
+      message: 'No playlist items configured',
+      target: stage,
+      asHtml: true
+    });
     return el;
   }
 
@@ -43,7 +48,12 @@ export function create(widget, config) {
       return;
     }
 
-    stage.innerHTML = `<div class="error">Unknown playlist item type: ${escapeHtml(item.type || '')}</div>`;
+    reportWidgetError({
+      widgetType: type,
+      message: `Unknown playlist item type: ${item.type || ''}`,
+      target: stage,
+      asHtml: true
+    });
     itemIndex = (itemIndex + 1) % items.length;
     setTimeout(playNext, 3000);
   }
@@ -61,6 +71,14 @@ function showImageSlide(stage, item) {
   img.className = 'playlist-image';
   img.src = item.src;
   img.alt = item.title || '';
+  img.onerror = () => {
+    reportWidgetError({
+      widgetType: type,
+      message: `Image failed to load: ${item.src || '(missing src)'}`,
+      target: stage,
+      asHtml: true
+    });
+  };
   if (item.fit === 'contain') {
     img.style.objectFit = 'contain';
   }
@@ -78,7 +96,13 @@ async function playRssFeed(stage, item, widget, config) {
   try {
     feed = await fetchFeed(feedUrl, item, config);
   } catch (error) {
-    stage.innerHTML = `<div class="error">Could not load feed: ${escapeHtml(feedUrl)}</div>`;
+    reportWidgetError({
+      widgetType: type,
+      message: `Could not load feed: ${feedUrl}`,
+      error,
+      target: stage,
+      asHtml: true
+    });
     await wait(2500);
     return;
   }
@@ -87,7 +111,12 @@ async function playRssFeed(stage, item, widget, config) {
   const limit = maxItems <= 0 ? Infinity : maxItems;
   const allItems = (feed.items || []).slice(0, limit);
   if (!allItems.length) {
-    stage.innerHTML = `<div class="error">No items in feed: ${escapeHtml(feedUrl)}</div>`;
+    reportWidgetError({
+      widgetType: type,
+      message: `No items in feed: ${feedUrl}`,
+      target: stage,
+      asHtml: true
+    });
     await wait(2500);
     return;
   }

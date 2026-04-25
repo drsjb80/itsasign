@@ -1,4 +1,4 @@
-import { createCard } from './utils.js';
+import { createCard, reportWidgetError } from './utils.js';
 
 export const type = 'weather';
 
@@ -17,7 +17,11 @@ export function create(widget) {
   const units = widget.units || 'fahrenheit';
 
   if (lat == null || lon == null) {
-    meta.textContent = 'Missing latitude/longitude in config';
+    reportWidgetError({
+      widgetType: type,
+      message: 'Missing latitude/longitude in config',
+      target: meta
+    });
     return el;
   }
 
@@ -34,7 +38,12 @@ export function create(widget) {
       temp.textContent = `${Math.round(data.current.temperature_2m)}°`;
       meta.textContent = weatherCodeToText(data.current.weather_code);
     } catch (error) {
-      meta.textContent = 'Weather unavailable';
+      reportWidgetError({
+        widgetType: type,
+        message: 'Weather unavailable',
+        error,
+        target: meta
+      });
     }
   }
 
