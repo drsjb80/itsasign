@@ -3,7 +3,8 @@
     "./widgets/clock.js",
     "./widgets/weather.js",
     "./widgets/playlist.js",
-    "./widgets/xkcd.js"
+    "./widgets/xkcd.js",
+    "./widgets/moon.js"
   ],
   "rss": {
     "proxy": "http://localhost:8080/"
@@ -74,6 +75,11 @@
           "forecastDays": 5,
           "windSpeedUnit": "mph",
           "refreshMs": 600000
+        },
+        {
+          "type": "moon",
+          "title": "Moon",
+          "refreshMs": 3600000
         },
         {
           "type": "xkcd",

@@ -84,6 +84,28 @@ html, body {
   margin-top: 8px;
 }
 
+.rss-snippet {
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin-top: 4px;
+  line-height: 1.45;
+  opacity: 0.8;
+}
+
+.weather-body {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-top: 4px;
+}
+
+.weather-left {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
 .weather-trend {
   color: var(--muted);
   font-size: 0.82rem;
@@ -94,7 +116,6 @@ html, body {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  margin-top: 6px;
 }
 
 .weather-icon {
@@ -110,34 +131,37 @@ html, body {
 
 .weather-location {
   color: var(--muted);
-  font-size: 0.85rem;
-  margin-top: 6px;
+  font-size: 0.82rem;
+  margin-top: 4px;
 }
 
 .weather-stats {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+  width: 44%;
 }
 
 .weather-stat {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 10px;
+  flex-direction: column;
+  padding: 6px 8px;
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.04);
+  gap: 1px;
 }
 
 .weather-stat-label {
   color: var(--muted);
-  font-size: 0.85rem;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .weather-stat-value {
   font-weight: bold;
-  font-size: 0.95rem;
+  font-size: 0.88rem;
 }
 
 .weather-forecast {
@@ -190,6 +214,28 @@ html, body {
   font-weight: bold;
   white-space: pre;
   line-height: 1.4;
+}
+
+.moon-image {
+  width: 140px;
+  height: 140px;
+  display: block;
+  margin: 4px auto 8px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.moon-phase-name {
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.moon-age {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 4px;
 }
 
 .playlist-stage {

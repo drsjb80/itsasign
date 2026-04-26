@@ -55,9 +55,17 @@ export function create(widget) {
   const forecastList = document.createElement('div');
   forecastList.className = 'weather-forecast-list';
 
+  const left = document.createElement('div');
+  left.className = 'weather-left';
+  left.append(currentRow, meta, trend, location);
+
+  const body = document.createElement('div');
+  body.className = 'weather-body';
+
   stats.append(pressure, wind, windChill);
+  body.append(left, stats);
   forecast.append(forecastTitle, forecastList);
-  el.append(currentRow, meta, trend, location, stats, forecast);
+  el.append(body, forecast);
 
   const configuredLat = widget.latitude;
   const configuredLon = widget.longitude;

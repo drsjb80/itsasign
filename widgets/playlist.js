@@ -167,6 +167,15 @@ function showRssPage(stage, data) {
     d.textContent = item.pubDate || '';
 
     row.append(h, d);
+
+    const snippet = truncateWords(stripHtml(item.contentSnippet || ''), 100);
+    if (snippet) {
+      const s = document.createElement('div');
+      s.className = 'rss-snippet';
+      s.textContent = snippet;
+      row.appendChild(s);
+    }
+
     itemsEl.appendChild(row);
   }
 
@@ -236,4 +245,16 @@ function parseRssXml(xmlText, fallbackUrl = '') {
 
 function buildQrUrl(value, size = 120) {
   return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}`;
+}
+
+function stripHtml(html) {
+  const tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
+}
+
+function truncateWords(text, maxWords) {
+  const words = text.trim().split(/\s+/);
+  if (words.length <= maxWords) return text.trim();
+  return words.slice(0, maxWords).join(' ') + '…';
 }
