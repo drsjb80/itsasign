@@ -54,6 +54,33 @@ Example plugin list:
 ]
 ```
 
+### Weather Widget Options
+
+The weather widget uses Open-Meteo and now supports current conditions and a daily forecast.
+
+```json
+{
+  "type": "weather",
+  "title": "Weather",
+  "latitude": 39.7392,
+  "longitude": -104.9903,
+  "units": "fahrenheit",
+  "useGeolocation": true,
+  "geolocationTimeoutMs": 7000,
+  "forecastDays": 5,
+  "windSpeedUnit": "mph",
+  "refreshMs": 600000
+}
+```
+
+- `latitude` / `longitude`: fallback location when geolocation is denied/unavailable.
+- `useGeolocation`: if `true`, requests browser geolocation and uses it when granted.
+- `geolocationTimeoutMs`: timeout for geolocation request.
+- `forecastDays`: daily forecast length (1-7).
+- `units`: `fahrenheit` or `celsius`.
+- `windSpeedUnit`: `mph`, `kmh`, `ms`, or `kn`.
+- `refreshMs`: refresh interval in milliseconds.
+
 ## Extending With New Widgets
 
 Add new widget modules under `widgets/`, then register them in `config.json` under `plugins`.
@@ -109,7 +136,7 @@ node_modules/.bin/concurrently 'npx serve' 'node cors-anywhere'
 
 ### 5. Weather widget shows unavailable data
 
-- Confirm latitude/longitude values are present in `config.json`.
+- Confirm either valid `latitude`/`longitude` values are present, or geolocation is allowed in the browser.
 - Check internet connectivity to Open-Meteo.
 - Verify browser console for fetch/network errors.
 

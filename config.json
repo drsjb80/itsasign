@@ -69,6 +69,10 @@
           "latitude": 39.7392,
           "longitude": -104.9903,
           "units": "fahrenheit",
+          "useGeolocation": true,
+          "geolocationTimeoutMs": 7000,
+          "forecastDays": 5,
+          "windSpeedUnit": "mph",
           "refreshMs": 600000
         },
         {

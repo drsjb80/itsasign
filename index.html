@@ -8,6 +8,7 @@
 </head>
 <body>
   <div id="app"></div>
+  <div id="ip-footer"></div>
 
   <script type="module">
     import { createCard, escapeHtml } from './widgets/utils.js';
@@ -79,6 +80,19 @@
       document.getElementById('app').innerHTML = `<pre style="padding:16px;white-space:pre-wrap;">${escapeHtml(error.message)}</pre>`;
       console.error(error);
     });
+
+    // Fetch and display local IP from the CORS proxy server.
+    (async function loadIp() {
+      const footer = document.getElementById('ip-footer');
+      try {
+        const res = await fetch('http://localhost:8080/ip');
+        if (!res.ok) throw new Error('no response');
+        const data = await res.json();
+        footer.textContent = data.ip;
+      } catch {
+        footer.textContent = '';
+      }
+    })();
   </script>
 </body>
 </html>

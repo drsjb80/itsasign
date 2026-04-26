@@ -84,10 +84,112 @@ html, body {
   margin-top: 8px;
 }
 
+.weather-trend {
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 4px;
+}
+
+.weather-current-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+.weather-icon {
+  font-size: 2rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
 .weather-temp {
   font-size: 2.3rem;
   font-weight: bold;
+}
+
+.weather-location {
+  color: var(--muted);
+  font-size: 0.85rem;
   margin-top: 6px;
+}
+
+.weather-stats {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.weather-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.weather-stat-label {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.weather-stat-value {
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.weather-forecast {
+  margin-top: 10px;
+}
+
+.weather-forecast-title {
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.weather-forecast-list {
+  display: flex;
+  flex-direction: row;
+  gap: 4px;
+  justify-content: space-between;
+}
+
+.weather-forecast-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 4px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 0.78rem;
+  text-align: center;
+  min-width: 0;
+}
+
+.weather-forecast-day {
+  font-weight: bold;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.weather-forecast-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+.weather-forecast-range {
+  font-weight: bold;
+  white-space: pre;
+  line-height: 1.4;
 }
 
 .playlist-stage {
@@ -192,4 +294,16 @@ html, body {
 .error {
   color: #fecaca;
   padding: 16px;
+}
+
+#ip-footer {
+  position: fixed;
+  bottom: 8px;
+  right: 12px;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.25);
+  font-family: monospace;
+  pointer-events: none;
+  user-select: none;
+  z-index: 100;
 }
