@@ -90,7 +90,10 @@ function showImageSlide(stage, item) {
 async function playRssFeed(stage, item, widget, config) {
   const feedUrl = item.url;
   const pageSize = item.itemsPerPage || widget.defaultRssItemsPerPage || 3;
-  const pageDurationMs = item.pageDurationMs || widget.defaultRssPageDurationMs || 7000;
+  const itemDurationMs = item.itemDurationMs
+    || widget.defaultRssItemDurationMs
+    || config.rss?.itemDurationMs
+    || 2000;
 
   let feed;
   try {
@@ -123,6 +126,7 @@ async function playRssFeed(stage, item, widget, config) {
 
   for (let start = 0; start < allItems.length; start += pageSize) {
     const pageItems = allItems.slice(start, start + pageSize);
+    const pageDurationMs = itemDurationMs * pageItems.length;
     showRssPage(stage, {
       title: item.title || feed.feed?.title || 'RSS Feed',
       url: feedUrl,

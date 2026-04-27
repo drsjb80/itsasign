@@ -7,7 +7,8 @@
     "./widgets/moon.js"
   ],
   "rss": {
-    "proxy": "http://localhost:8080/"
+    "proxy": "http://localhost:8080/",
+    "itemDurationMs": 2200
   },
   "layout": {
     "columns": "2fr 1fr",
@@ -37,8 +38,7 @@
               "type": "rss-feed",
               "title": "BBC News",
               "url": "https://feeds.bbci.co.uk/news/rss.xml",
-              "itemsPerPage": 10,
-              "pageDurationMs": 15000,
+              "itemsPerPage": 7,
               "maxItems": -1,
               "showQr": true
             },
@@ -47,8 +47,7 @@
               "title": "ACM AI",
               "url":
               "https://cacm.acm.org/category/artificial-intelligence-machine-learning/feed/",
-              "itemsPerPage": 10,
-              "pageDurationMs": 150000,
+              "itemsPerPage": 7,
               "maxItems": -1,
               "showQr": true
             }
