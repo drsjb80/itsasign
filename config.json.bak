@@ -27,6 +27,22 @@
           "defaultRssMaxItems": 12,
           "items": [
             {
+              "type": "image",
+              "title": "Toby",
+              "src": "http://sites.msudenver.edu/beatys/wp-content/uploads/sites/461/2026/04/Toby-scaled.png",
+              "durationMs": 8000,
+              "fit": "cover"
+            },
+            {
+              "type": "rss-feed",
+              "title": "BBC News",
+              "url": "https://feeds.bbci.co.uk/news/rss.xml",
+              "itemsPerPage": 10,
+              "pageDurationMs": 15000,
+              "maxItems": -1,
+              "showQr": true
+            },
+            {
               "type": "rss-feed",
               "title": "ACM AI",
               "url":

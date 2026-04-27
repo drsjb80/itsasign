@@ -22,7 +22,7 @@ var cors_proxy = require('cors-anywhere');
 
 var proxy = cors_proxy.createServer({
     originWhitelist: [], // Allow all origins
-    requireHeader: ['origin', 'x-requested-with'],
+    requireHeader: [],
     removeHeaders: ['cookie', 'cookie2']
 });
 
@@ -59,6 +59,9 @@ http.createServer(function(req, res) {
     return;
   }
   req.url = normalizeEncodedProxyUrl(req.url);
+  if (!req.headers['user-agent']) {
+    req.headers['user-agent'] = 'Mozilla/5.0 (compatible; itsasign/1.0)';
+  }
   proxy.emit('request', req, res);
 }).listen(port, host, function() {
     console.log('Running CORS Anywhere on ' + host + ':' + port);

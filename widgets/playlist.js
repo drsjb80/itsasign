@@ -126,6 +126,7 @@ async function playRssFeed(stage, item, widget, config) {
     showRssPage(stage, {
       title: item.title || feed.feed?.title || 'RSS Feed',
       url: feedUrl,
+      source: feed.source || 'rss',
       items: pageItems,
       showQr: item.showQr !== false,
       qrSize: item.qrSize || 120
@@ -172,6 +173,13 @@ function showRssPage(stage, data) {
     if (snippet) {
       const s = document.createElement('div');
       s.className = 'rss-snippet';
+    if (data.source === 'rss2json') {
+      const sourceTag = document.createElement('span');
+      sourceTag.className = 'rss-source-tag';
+      sourceTag.textContent = 'via fallback';
+      url.appendChild(document.createTextNode(' '));
+      url.appendChild(sourceTag);
+    }
       s.textContent = snippet;
       row.appendChild(s);
     }
@@ -207,11 +215,56 @@ async function fetchFeed(feedUrl, item = {}, config = {}) {
 
   const response = await fetch(finalUrl);
   if (!response.ok) {
+    const fallback = await fetchFeedViaRss2Json(feedUrl);
+    if (fallback) {
+      return fallback;
+    }
     throw new Error(`Feed fetch failed: ${finalUrl}`);
   }
 
   const xmlText = await response.text();
-  return parseRssXml(xmlText, feedUrl);
+  try {
+    return parseRssXml(xmlText, feedUrl);
+  } catch (error) {
+    const fallback = await fetchFeedViaRss2Json(feedUrl);
+    if (fallback) {
+      return fallback;
+    }
+    throw error;
+  }
+}
+
+async function fetchFeedViaRss2Json(feedUrl) {
+  const fallbackUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
+
+  try {
+    const response = await fetch(fallbackUrl);
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = await response.json();
+    if (data?.status !== 'ok' || !Array.isArray(data.items)) {
+      return null;
+    }
+
+    return {
+      source: 'rss2json',
+      feed: {
+        title: data.feed?.title || 'RSS Feed',
+        link: data.feed?.link || feedUrl,
+        description: data.feed?.description || ''
+      },
+      items: data.items.map(item => ({
+        title: item?.title || '(untitled)',
+        link: item?.link || '',
+        pubDate: item?.pubDate || '',
+        contentSnippet: item?.description || item?.content || ''
+      }))
+    };
+  } catch {
+    return null;
+  }
 }
 
 function parseRssXml(xmlText, fallbackUrl = '') {
@@ -234,6 +287,7 @@ function parseRssXml(xmlText, fallbackUrl = '') {
   }));
 
   return {
+    source: 'rss',
     feed: {
       title: feedTitle,
       link: feedLink,
