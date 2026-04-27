@@ -107,7 +107,7 @@ export function create(widget) {
       const data = await response.json();
       const current = data.current || {};
 
-      icon.textContent = weatherCodeToIcon(current.weather_code);
+      icon.innerHTML = weatherCodeToIcon(current.weather_code);
       temp.textContent = formatTemperature(current.temperature_2m);
       meta.textContent = weatherCodeToText(current.weather_code);
 
@@ -406,7 +406,7 @@ function renderForecast({ forecastList, times, codes, maxTemps, minTemps }) {
 
     const dayIcon = document.createElement('div');
     dayIcon.className = 'weather-forecast-icon';
-    dayIcon.textContent = weatherCodeToIcon(codes && codes[i]);
+    dayIcon.innerHTML = weatherCodeToIcon(codes && codes[i]);
 
     const range = document.createElement('div');
     range.className = 'weather-forecast-range';
@@ -472,20 +472,64 @@ function formatTemperature(value) {
 }
 
 function weatherCodeToIcon(code) {
-  if (code === 0) return '☀️';
-  if (code === 1) return '🌤️';
-  if (code === 2) return '⛅';
-  if (code === 3) return '☁️';
-  if (code === 45 || code === 48) return '🌫️';
-  if (code >= 51 && code <= 55) return '🌦️';
-  if (code >= 56 && code <= 57) return '🌨️';
-  if (code >= 61 && code <= 65) return '🌧️';
-  if (code >= 66 && code <= 67) return '🌨️';
-  if (code >= 71 && code <= 77) return '❄️';
-  if (code >= 80 && code <= 82) return '🌦️';
-  if (code === 85 || code === 86) return '🌨️';
-  if (code >= 95 && code <= 99) return '⛈️';
-  return '🌡️';
+  // Helper to create inline SVG strings
+  const svg = (content) => `<svg viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">${content}</svg>`;
+
+  if (code === 0) {
+    // Clear - sun
+    return svg('<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3" stroke="currentColor" stroke-width="2"/><line x1="12" y1="21" x2="12" y2="23" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78" stroke="currentColor" stroke-width="2"/><line x1="1" y1="12" x2="3" y2="12" stroke="currentColor" stroke-width="2"/><line x1="21" y1="12" x2="23" y2="12" stroke="currentColor" stroke-width="2"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36" stroke="currentColor" stroke-width="2"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22" stroke="currentColor" stroke-width="2"/>');
+  }
+  if (code === 1) {
+    // Mostly clear - sun with small cloud
+    return svg('<circle cx="9" cy="9" r="4" fill="currentColor"/><line x1="9" y1="2" x2="9" y2="3.5" stroke="currentColor" stroke-width="1.5"/><line x1="9" y1="14.5" x2="9" y2="16" stroke="currentColor" stroke-width="1.5"/><line x1="2.5" y1="9" x2="4" y2="9" stroke="currentColor" stroke-width="1.5"/><line x1="14" y1="9" x2="15.5" y2="9" stroke="currentColor" stroke-width="1.5"/><path d="M14 16c1.5 0 2.8.8 3.5 2 .3.6.5 1.3.5 2 0 2.2-1.8 4-4 4h-5c-2.2 0-4-1.8-4-4 0-.7.2-1.4.5-2 .7-1.2 2-2 3.5-2z" stroke="currentColor" stroke-width="1.5" fill="none"/>');
+  }
+  if (code === 2) {
+    // Partly cloudy - sun with cloud
+    return svg('<circle cx="8" cy="8" r="3.5" fill="currentColor"/><path d="M13 15c1.5 0 2.8.8 3.5 2 .3.6.5 1.3.5 2 0 2.2-1.8 4-4 4H8c-2.2 0-4-1.8-4-4 0-.7.2-1.4.5-2 .7-1.2 2-2 3.5-2z" stroke="currentColor" stroke-width="1.5" fill="none"/>');
+  }
+  if (code === 3) {
+    // Overcast - cloud
+    return svg('<path d="M18 10c1.1 0 2 .9 2 2 0 1-.7 1.9-1.7 2-.3 2-2 3.5-4.3 3.5H6c-2.2 0-4-1.8-4-4 0-2 1.6-3.7 3.6-3.9C6.3 8.5 7.3 8 8.5 8c1.1 0 2.2.4 3 1.1.8-.7 1.9-1.1 3-1.1z" stroke="currentColor" stroke-width="1.5" fill="none"/>');
+  }
+  if (code === 45 || code === 48) {
+    // Fog - cloud with lines
+    return svg('<path d="M18 10c1.1 0 2 .9 2 2 0 1-.7 1.9-1.7 2-.3 2-2 3.5-4.3 3.5H6c-2.2 0-4-1.8-4-4 0-2 1.6-3.7 3.6-3.9C6.3 8.5 7.3 8 8.5 8c1.1 0 2.2.4 3 1.1.8-.7 1.9-1.1 3-1.1z" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="3" y1="17" x2="9" y2="17" stroke="currentColor" stroke-width="1"/><line x1="11" y1="17" x2="21" y2="17" stroke="currentColor" stroke-width="1"/><line x1="3" y1="19" x2="12" y2="19" stroke="currentColor" stroke-width="1"/><line x1="14" y1="19" x2="21" y2="19" stroke="currentColor" stroke-width="1"/>');
+  }
+  if (code >= 51 && code <= 55) {
+    // Drizzle - cloud with light drops
+    return svg('<path d="M18 10c1.1 0 2 .9 2 2 0 1-.7 1.9-1.7 2-.3 2-2 3.5-4.3 3.5H6c-2.2 0-4-1.8-4-4 0-2 1.6-3.7 3.6-3.9C6.3 8.5 7.3 8 8.5 8c1.1 0 2.2.4 3 1.1.8-.7 1.9-1.1 3-1.1z" stroke="currentColor" stroke-width="1.5" fill="none"/><circle cx="7" cy="18" r="0.8" fill="currentColor"/><circle cx="10" cy="18" r="0.8" fill="currentColor"/><circle cx="13" cy="18" r="0.8" fill="currentColor"/><circle cx="16" cy="18" r="0.8" fill="currentColor"/>');
+  }
+  if (code >= 56 && code <= 57) {
+    // Freezing drizzle - cloud with snowflakes
+    return svg('<path d="M18 10c1.1 0 2 .9 2 2 0 1-.7 1.9-1.7 2-.3 2-2 3.5-4.3 3.5H6c-2.2 0-4-1.8-4-4 0-2 1.6-3.7 3.6-3.9C6.3 8.5 7.3 8 8.5 8c1.1 0 2.2.4 3 1.1.8-.7 1.9-1.1 3-1.1z" stroke="currentColor" stroke-width="1.5" fill="none"/><g stroke="currentColor" stroke-width="1"><line x1="7" y1="17" x2="7" y2="20"/><line x1="5.5" y1="18.5" x2="8.5" y2="18.5"/><line x1="6" y1="17.5" x2="8" y2="19.5"/><line x1="8" y1="17.5" x2="6" y2="19.5"/></g>');
+  }
+  if (code >= 61 && code <= 65) {
+    // Rain - cloud with rain drops
+    return svg('<path d="M18 10c1.1 0 2 .9 2 2 0 1-.7 1.9-1.7 2-.3 2-2 3.5-4.3 3.5H6c-2.2 0-4-1.8-4-4 0-2 1.6-3.7 3.6-3.9C6.3 8.5 7.3 8 8.5 8c1.1 0 2.2.4 3 1.1.8-.7 1.9-1.1 3-1.1z" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="5" y1="17" x2="4" y2="20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="9" y1="17" x2="8" y2="20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="13" y1="17" x2="12" y2="20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><line x1="17" y1="17" x2="16" y2="20" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>');
+  }
+  if (code >= 66 && code <= 67) {
+    // Freezing rain - cloud with snow
+    return svg('<path d="M18 10c1.1 0 2 .9 2 2 0 1-.7 1.9-1.7 2-.3 2-2 3.5-4.3 3.5H6c-2.2 0-4-1.8-4-4 0-2 1.6-3.7 3.6-3.9C6.3 8.5 7.3 8 8.5 8c1.1 0 2.2.4 3 1.1.8-.7 1.9-1.1 3-1.1z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5.5 19l1-1.7m0 1.7l-1-1.7M4 20l1.5-1.5M6 20L4.5 18.5M7 17l1 3m0-3l-1 3" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>');
+  }
+  if (code >= 71 && code <= 77) {
+    // Snow - snowflakes
+    return svg('<path d="M18 10c1.1 0 2 .9 2 2 0 1-.7 1.9-1.7 2-.3 2-2 3.5-4.3 3.5H6c-2.2 0-4-1.8-4-4 0-2 1.6-3.7 3.6-3.9C6.3 8.5 7.3 8 8.5 8c1.1 0 2.2.4 3 1.1.8-.7 1.9-1.1 3-1.1z" stroke="currentColor" stroke-width="1.5" fill="none"/><g stroke="currentColor" stroke-width="1"><line x1="5" y1="17.5" x2="5" y2="21.5"/><line x1="3" y1="19.5" x2="7" y2="19.5"/><line x1="3.5" y1="17.5" x2="6.5" y2="21.5"/><line x1="6.5" y1="17.5" x2="3.5" y2="21.5"/></g><g stroke="currentColor" stroke-width="1"><line x1="12" y1="17.5" x2="12" y2="21.5"/><line x1="10" y1="19.5" x2="14" y2="19.5"/><line x1="10.5" y1="17.5" x2="13.5" y2="21.5"/><line x1="13.5" y1="17.5" x2="10.5" y2="21.5"/></g>');
+  }
+  if (code >= 80 && code <= 82) {
+    // Showers - heavy rain
+    return svg('<path d="M18 10c1.1 0 2 .9 2 2 0 1-.7 1.9-1.7 2-.3 2-2 3.5-4.3 3.5H6c-2.2 0-4-1.8-4-4 0-2 1.6-3.7 3.6-3.9C6.3 8.5 7.3 8 8.5 8c1.1 0 2.2.4 3 1.1.8-.7 1.9-1.1 3-1.1z" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="4" y1="17" x2="3" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="17" x2="7" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="11" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="16" y1="17" x2="15" y2="20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>');
+  }
+  if (code === 85 || code === 86) {
+    // Snow showers - heavy snow
+    return svg('<path d="M18 10c1.1 0 2 .9 2 2 0 1-.7 1.9-1.7 2-.3 2-2 3.5-4.3 3.5H6c-2.2 0-4-1.8-4-4 0-2 1.6-3.7 3.6-3.9C6.3 8.5 7.3 8 8.5 8c1.1 0 2.2.4 3 1.1.8-.7 1.9-1.1 3-1.1z" stroke="currentColor" stroke-width="1.5" fill="none"/><g stroke="currentColor" stroke-width="1.2"><line x1="5" y1="17" x2="5" y2="20.5"/><line x1="3" y1="18.75" x2="7" y2="18.75"/><line x1="3.5" y1="17" x2="6.5" y2="20.5"/><line x1="6.5" y1="17" x2="3.5" y2="20.5"/></g><g stroke="currentColor" stroke-width="1.2"><line x1="12" y1="17" x2="12" y2="20.5"/><line x1="10" y1="18.75" x2="14" y2="18.75"/><line x1="10.5" y1="17" x2="13.5" y2="20.5"/><line x1="13.5" y1="17" x2="10.5" y2="20.5"/></g>');
+  }
+  if (code >= 95 && code <= 99) {
+    // Thunderstorm - cloud with lightning
+    return svg('<path d="M18 10c1.1 0 2 .9 2 2 0 1-.7 1.9-1.7 2-.3 2-2 3.5-4.3 3.5H6c-2.2 0-4-1.8-4-4 0-2 1.6-3.7 3.6-3.9C6.3 8.5 7.3 8 8.5 8c1.1 0 2.2.4 3 1.1.8-.7 1.9-1.1 3-1.1z" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M10 16l-1 2 1.5-.5 1.5 2.5-1-2 2 .5-1.5-2.5" fill="currentColor" stroke="currentColor" stroke-width="1" stroke-linejoin="round"/>');
+  }
+  
+  // Default - question mark
+  return svg('<text x="12" y="18" text-anchor="middle" font-size="16" font-weight="bold" fill="currentColor">?</text>');
 }
 
 function weatherCodeToText(code) {
