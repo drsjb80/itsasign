@@ -1,2 +1,4 @@
 npm install
 node_modules/.bin/concurrently 'npx serve' 'node cors-anywhere'
+/opt/homebrew/bin/Chromium --kiosk 'http://localhost:3000'
+/opt/homebrew/bin/Chromium --kiosk --user-data-dir=/tmp/itsasign 'http://localhost:3000'
