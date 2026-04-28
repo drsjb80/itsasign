@@ -51,6 +51,32 @@ html, body {
   gap: 12px;
 }
 
+.panel.header-strip {
+  background: transparent;
+}
+
+.panel.header-strip .panel-body {
+  padding: 0;
+}
+
+.panel.header-strip .widget-card {
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.panel.header-strip .meta-row,
+.panel.header-strip .widget-title {
+  display: none;
+}
+
+.panel.header-strip .playlist-stage {
+  border-radius: var(--radius);
+}
+
 .widget-card {
   background: var(--panel-2);
   border-radius: 10px;

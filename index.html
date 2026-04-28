@@ -37,9 +37,17 @@
       app.style.gridTemplateColumns = config.layout?.columns || '2fr 1fr';
       app.style.gridTemplateRows = config.layout?.rows || '1fr';
 
-      for (const panel of config.panels || []) {
+      const panels = (config.panels || []).filter(p => {
+        if (p.className === 'header-strip' && !config.headerEnabled) return false;
+        return true;
+      });
+
+      for (const panel of panels) {
         const panelEl = document.createElement('section');
         panelEl.className = 'panel';
+        if (panel.className) {
+          panelEl.classList.add(panel.className);
+        }
         if (panel.gridArea) panelEl.style.gridArea = panel.gridArea;
 
         if (panel.title) {

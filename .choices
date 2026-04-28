@@ -1,4 +1,4 @@
 npm install
 node_modules/.bin/concurrently 'npx serve' 'node cors-anywhere'
 chromium --kiosk 'http://localhost:3000'
-chromium --kiosk --start-maximized 'http://localhost:3000'
+chromium --start-maximized 'http://localhost:3000'

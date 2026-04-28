@@ -1,3 +1,29 @@
+# Header Image
+
+The optional full-width header strip is configured via `headerEnabled` in `config.json`.
+
+The header height is fixed at whatever value is set in `layout.rows` (e.g. `"160px 1fr"`). The image is displayed with `fit: contain`, so the **entire image is shown without cropping**.
+
+### Recommended image dimensions
+
+To fill the strip edge-to-edge with no letterboxing, the image aspect ratio must match the header strip's ratio:
+
+```
+image width / image height = display width / header height
+```
+
+Examples for a **160 px** header:
+
+| Display resolution | Ideal image size |
+|---|---|
+| 1920 × 1080 | 1920 × 160 |
+| 2560 × 1440 | 2560 × 160 |
+| 3840 × 2160 | 3840 × 160 |
+
+If the image has a different aspect ratio, blank space will appear on the sides (`contain`) or the image will be cropped (`cover`).
+
+---
+
 # Adding New Widgets
 
 This project uses a plugin pattern for widgets.
