@@ -35,6 +35,8 @@ This starts:
 - A static web server for the app (via `npx serve`)
 - A local CORS proxy for RSS requests (via `node cors-anywhere`)
 
+Surf to [http://localhost:3000/](http://localhost:3000/)
+
 ## Configuration
 
 Primary configuration lives in `config.json`:
