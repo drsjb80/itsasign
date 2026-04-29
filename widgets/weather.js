@@ -422,11 +422,13 @@ function dayLabel(dateText, index) {
     return 'Today';
   }
 
-  const date = new Date(dateText);
-  if (Number.isNaN(date.getTime())) {
+  const [year, month, day] = dateText.split('-').map(Number);
+  if (!year || !month || !day) {
     return dateText;
   }
 
+  // Create date at local midnight to avoid timezone interpretation issues
+  const date = new Date(year, month - 1, day);
   return new Intl.DateTimeFormat(undefined, { weekday: 'short' }).format(date);
 }
 

@@ -177,13 +177,6 @@ function showRssPage(stage, data) {
     if (snippet) {
       const s = document.createElement('div');
       s.className = 'rss-snippet';
-    if (data.source === 'rss2json') {
-      const sourceTag = document.createElement('span');
-      sourceTag.className = 'rss-source-tag';
-      sourceTag.textContent = 'via fallback';
-      url.appendChild(document.createTextNode(' '));
-      url.appendChild(sourceTag);
-    }
       s.textContent = snippet;
       row.appendChild(s);
     }
