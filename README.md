@@ -45,6 +45,7 @@ Primary configuration lives in `config.json`:
 - `layout`: CSS grid columns/rows
 - `panels`: panel definitions and per-panel `widgets`
 - `rss.proxy`: optional default proxy URL for RSS feeds
+- `rss.fontScale`: optional global RSS text scale factor (default `1`)
 
 Example plugin list:
 
@@ -54,6 +55,46 @@ Example plugin list:
   "./widgets/weather.js",
   "./widgets/playlist.js"
 ]
+
+### RSS Playlist Font Scale
+
+RSS feed text uses original base sizes by default (`fontScale: 1`).
+You can scale all RSS text with these options:
+
+- Global default: `rss.fontScale`
+- Playlist-level default: `defaultRssFontScale`
+- Per RSS item override: `fontScale`
+
+Precedence is per-item, then playlist default, then global.
+
+Example:
+
+```json
+{
+  "rss": {
+    "proxy": "http://localhost:8080/",
+    "fontScale": 2
+  },
+  "panels": [
+    {
+      "widgets": [
+        {
+          "type": "playlist",
+          "defaultRssFontScale": 1.4,
+          "items": [
+            {
+              "type": "rss-feed",
+              "title": "BBC News",
+              "url": "https://feeds.bbci.co.uk/news/rss.xml",
+              "fontScale": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
 ```
 
 ### Weather Widget Options

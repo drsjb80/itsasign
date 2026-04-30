@@ -9,7 +9,8 @@
   ],
   "rss": {
     "proxy": "http://localhost:8080/",
-    "itemDurationMs": 2200
+    "itemDurationMs": 2200,
+    "fontScale": 2
   },
   "layout": {
     "columns": "2fr 1fr",
@@ -50,10 +51,18 @@
             {
               "type": "image",
               "title": "Toby",
+              "src": "https://www.wpc.ncep.noaa.gov/noaa/noaa.gif",
+              "durationMs": 8000,
+              "fit": "cover"
+            },
+            {
+              "type": "image",
+              "title": "Toby",
               "src": "http://sites.msudenver.edu/beatys/wp-content/uploads/sites/461/2026/04/Toby-scaled.png",
               "durationMs": 8000,
               "fit": "cover"
             },
+
             {
               "type": "rss-feed",
               "title": "BBC News",

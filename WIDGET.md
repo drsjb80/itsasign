@@ -228,6 +228,44 @@ App-side usage note:
 
 - If you later implement widget replacement/re-rendering, call `plugin.destroy(oldElement)` before removing it from the DOM.
 
+## RSS Font Scale Options (Playlist Widget)
+
+The playlist RSS slide supports a text scale factor while keeping original default sizes.
+
+- Global: `rss.fontScale` (default `1`)
+- Playlist default: `defaultRssFontScale`
+- Per RSS item: `fontScale`
+
+Precedence: per-item, then playlist default, then global.
+
+Example:
+
+```json
+{
+  "rss": {
+    "fontScale": 1.25
+  },
+  "panels": [
+    {
+      "widgets": [
+        {
+          "type": "playlist",
+          "defaultRssFontScale": 1.5,
+          "items": [
+            {
+              "type": "rss-feed",
+              "title": "ACM AI",
+              "url": "https://cacm.acm.org/category/artificial-intelligence-machine-learning/feed/",
+              "fontScale": 2
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
 ## Current Widget Modules
 
 Existing widget plugins in this project:

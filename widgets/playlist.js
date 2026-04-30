@@ -133,7 +133,8 @@ async function playRssFeed(stage, item, widget, config) {
       source: feed.source || 'rss',
       items: pageItems,
       showQr: item.showQr !== false,
-      qrSize: item.qrSize || 120
+      qrSize: item.qrSize || 120,
+      fontScale: resolveRssFontScale(item, widget, config)
     });
     await wait(pageDurationMs);
   }
@@ -144,6 +145,7 @@ function showRssPage(stage, data) {
 
   const slide = document.createElement('div');
   slide.className = 'playlist-slide rss-slide';
+  slide.style.setProperty('--rss-font-scale', String(data.fontScale || 1));
 
   const main = document.createElement('div');
   main.className = 'rss-main';
@@ -292,6 +294,16 @@ function parseRssXml(xmlText, fallbackUrl = '') {
     },
     items
   };
+}
+
+function resolveRssFontScale(item = {}, widget = {}, config = {}) {
+  const raw = item.fontScale
+    ?? widget.defaultRssFontScale
+    ?? config.rss?.fontScale
+    ?? 1;
+
+  const scale = Number(raw);
+  return Number.isFinite(scale) && scale > 0 ? scale : 1;
 }
 
 function buildQrUrl(value, size = 120) {
