@@ -1,5 +1,6 @@
 {
   "headerEnabled": true,
+  "reloadConfigMs": 3600000,
   "plugins": [
     "./widgets/clock.js",
     "./widgets/daydate.js",

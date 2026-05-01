@@ -13,8 +13,26 @@
   <script type="module">
     import { createCard, escapeHtml } from './widgets/utils.js';
 
+    const DEFAULT_CONFIG_RELOAD_MS = 60 * 60 * 1000;
+    let configReloadTimer = null;
+
+    function scheduleConfigReload(intervalMs = DEFAULT_CONFIG_RELOAD_MS) {
+      const safeInterval = Number.isFinite(intervalMs) && intervalMs > 0
+        ? intervalMs
+        : DEFAULT_CONFIG_RELOAD_MS;
+
+      if (configReloadTimer) {
+        clearInterval(configReloadTimer);
+      }
+
+      configReloadTimer = setInterval(() => {
+        window.location.reload();
+      }, safeInterval);
+    }
+
     async function main() {
       const config = await loadJson('config.json');
+      scheduleConfigReload(Number(config.reloadConfigMs) || DEFAULT_CONFIG_RELOAD_MS);
       const plugins = await loadPlugins(config.plugins || []);
       renderApp(config, plugins);
     }
@@ -83,6 +101,8 @@
       el.appendChild(msg);
       return el;
     }
+
+    scheduleConfigReload();
 
     main().catch(error => {
       document.getElementById('app').innerHTML = `<pre style="padding:16px;white-space:pre-wrap;">${escapeHtml(error.message)}</pre>`;
