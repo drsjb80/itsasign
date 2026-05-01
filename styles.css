@@ -51,6 +51,16 @@ html, body {
   gap: 12px;
 }
 
+.panel.sidebar-panel .panel-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-content: start;
+}
+
+.panel.sidebar-panel .panel-body > :nth-child(n + 3) {
+  grid-column: 1 / -1;
+}
+
 .panel.header-strip {
   background: transparent;
 }
@@ -81,6 +91,35 @@ html, body {
   background: var(--panel-2);
   border-radius: 10px;
   padding: 12px;
+}
+
+.clock-widget {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.daydate-widget {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 224px;
+}
+
+.daydate-weekday {
+  font-size: 2rem;
+  line-height: 1.05;
+  font-weight: bold;
+}
+
+.daydate-date {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 1.45rem;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
 }
 
 .widget-title {

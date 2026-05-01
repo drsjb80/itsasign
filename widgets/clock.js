@@ -5,6 +5,7 @@ export const type = 'clock';
 export function create(widget) {
   const size = widget.size || 200;
   const el = createCard(widget.title || null);
+  el.classList.add('clock-widget');
 
   const canvas = document.createElement('canvas');
   canvas.width = size;

@@ -2,6 +2,7 @@
   "headerEnabled": true,
   "plugins": [
     "./widgets/clock.js",
+    "./widgets/daydate.js",
     "./widgets/weather.js",
     "./widgets/playlist.js",
     "./widgets/xkcd.js",
@@ -86,12 +87,17 @@
     },
     {
       "title": "Sidebar",
+      "className": "sidebar-panel",
       "gridArea": "2 / 2 / 3 / 3",
       "widgets": [
         {
           "type": "clock",
           "size": 200,
           "backgroundColor": "#333"
+        },
+        {
+          "type": "daydate",
+          "locale": "en-US"
         },
         {
           "type": "weather",
