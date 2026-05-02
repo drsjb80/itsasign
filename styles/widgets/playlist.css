@@ -1,0 +1,126 @@
+.playlist-stage {
+  min-height: 0;
+  flex: 1;
+  background: #000;
+  border-radius: 10px;
+  overflow: hidden;
+  position: relative;
+  display: flex;
+}
+
+.playlist-slide {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: #000;
+}
+
+.playlist-image {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  background: #000;
+}
+
+.rss-slide {
+  --rss-font-scale: 1;
+  background: #111827;
+  color: var(--text);
+  height: 100%;
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr 130px;
+  gap: 16px;
+  align-items: start;
+}
+
+.rss-main {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.rss-feed-title {
+  font-size: calc(1.2rem * var(--rss-font-scale, 1));
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.rss-feed-url {
+  color: var(--muted);
+  font-size: calc(0.85rem * var(--rss-font-scale, 1));
+  word-break: break-all;
+  margin-bottom: 12px;
+}
+
+.rss-source-tag {
+  display: inline-block;
+  font-size: calc(0.72rem * var(--rss-font-scale, 1));
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  opacity: 0.7;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  padding: 1px 6px;
+  vertical-align: middle;
+}
+
+.rss-items {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.rss-item {
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.rss-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.rss-title {
+  font-size: calc(1rem * var(--rss-font-scale, 1));
+  font-weight: bold;
+  line-height: 1.25;
+  margin-bottom: 6px;
+}
+
+.rss-date {
+  color: var(--muted);
+  margin-top: 8px;
+  font-size: calc(1rem * var(--rss-font-scale, 1));
+}
+
+.rss-snippet {
+  color: var(--muted);
+  font-size: calc(0.78rem * var(--rss-font-scale, 1));
+  margin-top: 4px;
+  line-height: 1.45;
+  opacity: 0.8;
+}
+
+.rss-qr-wrap {
+  background: white;
+  border-radius: 8px;
+  padding: 8px;
+  align-self: start;
+}
+
+.rss-qr-wrap img {
+  width: 100%;
+  display: block;
+}
+
+.rss-qr-label {
+  color: var(--muted);
+  font-size: calc(0.8rem * var(--rss-font-scale, 1));
+  margin-top: 8px;
+  text-align: center;
+}

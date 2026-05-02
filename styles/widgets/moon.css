@@ -1,0 +1,21 @@
+.moon-image {
+  width: 140px;
+  height: 140px;
+  display: block;
+  margin: 4px auto 8px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.moon-phase-name {
+  text-align: center;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+.moon-age {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 4px;
+}

@@ -59,6 +59,27 @@ Notes:
 - `create()` can use anything from the widget config object.
 - `create()` should return one root element.
 
+## 1.5 Add widget CSS (recommended)
+
+Styles are split into smaller files for easier maintenance.
+
+Use this layout:
+- styles/base.css: app-level variables, page shell, panel shell, global error/footer
+- styles/panels.css: panel-specific layout overrides (for example sidebar and header-strip)
+- styles/widgets/common.css: shared widget card/title/meta styles
+- styles/widgets/<widget-name>.css: styles specific to one widget
+
+When adding a new widget stylesheet:
+
+1. Create a file at styles/widgets/<widget-name>.css.
+2. Add an import in styles.css, for example:
+
+```css
+@import url('./styles/widgets/news.css');
+```
+
+3. Keep selectors widget-scoped (for example .news-widget, .news-title) to avoid collisions.
+
 ## 2. Register the module in config.json
 
 Add the new module path to the top-level `plugins` array in `config.json`.

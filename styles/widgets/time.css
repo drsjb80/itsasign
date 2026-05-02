@@ -1,0 +1,11 @@
+.time-value {
+  font-size: 3rem;
+  line-height: 1;
+  font-weight: bold;
+  margin-top: 6px;
+}
+
+.time-date {
+  color: var(--muted);
+  margin-top: 8px;
+}

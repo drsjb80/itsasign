@@ -1,0 +1,22 @@
+.daydate-widget {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  min-height: 224px;
+}
+
+.daydate-weekday {
+  font-size: 2rem;
+  line-height: 1.05;
+  font-weight: bold;
+}
+
+.daydate-date {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 1.45rem;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
+}
