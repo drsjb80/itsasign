@@ -7,7 +7,8 @@
     "./widgets/weather.js",
     "./widgets/playlist.js",
     "./widgets/xkcd.js",
-    "./widgets/moon.js"
+    "./widgets/moon.js",
+    "./widgets/qotd.js"
   ],
   "rss": {
     "proxy": "http://localhost:8080/",
@@ -121,6 +122,10 @@
           "type": "xkcd",
           "title": "XKCD",
           "refreshMs": 3600000
+        },
+        {
+          "type": "qotd",
+          "title": "Quote of the Day"
         }
       ]
     }

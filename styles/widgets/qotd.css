@@ -1,0 +1,12 @@
+.qotd-quote {
+  font-size: 1.1rem;
+  line-height: 1.55;
+  font-style: italic;
+}
+
+.qotd-attribution {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: right;
+}
