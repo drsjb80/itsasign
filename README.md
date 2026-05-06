@@ -56,6 +56,9 @@ Example plugin list:
   "./widgets/playlist.js"
 ]
 
+### Making it Vertical
+wlr-randr --output HDMI-A-1 --transform flipped-90
+
 ### RSS Playlist Font Scale
 
 RSS feed text uses original base sizes by default (`fontScale: 1`).
