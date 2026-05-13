@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Kiosk
+Comment=Start the kiosk automatically
+Exec=/home/pi/scripts/kiosk.sh
+X-GNOME-Autostart-enabled=true
+Terminal=false
