@@ -1,5 +1,6 @@
 npm install
-node_modules/.bin/concurrently 'npx serve' 'node cors-anywhere'
+wlr-randr --output HDMI-A-1 --transform flipped-90
+node_modules/.bin/concurrently 'npx serve' 'node cors-anywhere' &
 chromium 'http://localhost:3000'
 chromium --kiosk 'http://localhost:3000'
 chromium --start-maximized 'http://localhost:3000'
