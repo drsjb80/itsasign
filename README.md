@@ -57,7 +57,8 @@ Example plugin list:
 ]
 
 ### Making it Vertical
-wlr-randr --output HDMI-A-1 --transform flipped-90
+
+wlr-randr --output $(wlr-randr | head -1 | sed -e 's/ .*//') --transform flipped-90
 
 ### RSS Playlist Font Scale
 
