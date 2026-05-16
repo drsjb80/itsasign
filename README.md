@@ -19,23 +19,15 @@ ItsaSign is an extensible digital signage application that renders configurable 
 
 ## Install
 
-```bash
-npm install
-```
+    npm install
 
 ## Run
 
-From the project root:
+Copy `kiosk.sh` to `~/scripts/`
 
-```bash
-node_modules/.bin/concurrently 'npx serve' 'node cors-anywhere'
-```
+Cope `kiosk.desktop` to `~/.config/autostart`
 
-This starts:
-- A static web server for the app (via `npx serve`)
-- A local CORS proxy for RSS requests (via `node cors-anywhere`)
-
-Surf to [http://localhost:3000/](http://localhost:3000/)
+Reboot.
 
 ## Configuration
 
@@ -49,15 +41,15 @@ Primary configuration lives in `config.json`:
 
 Example plugin list:
 
-```json
-"plugins": [
-  "./widgets/clock.js",
-  "./widgets/weather.js",
-  "./widgets/playlist.js"
-]
+    "plugins": [
+      "./widgets/clock.js",
+      "./widgets/weather.js",
+      "./widgets/playlist.js"
+    ]
 
 ### Making it Vertical
-wlr-randr --output HDMI-A-1 --transform flipped-90
+
+    wlr-randr --output $(wlr-randr | head -1 | sed -e 's/ .*//') --transform flipped-90
 
 ### RSS Playlist Font Scale
 
@@ -72,52 +64,47 @@ Precedence is per-item, then playlist default, then global.
 
 Example:
 
-```json
-{
-  "rss": {
-    "proxy": "http://localhost:8080/",
-    "fontScale": 2
-  },
-  "panels": [
     {
-      "widgets": [
+      "rss": {
+        "proxy": "http://localhost:8080/",
+        "fontScale": 2
+      },
+      "panels": [
         {
-          "type": "playlist",
-          "defaultRssFontScale": 1.4,
-          "items": [
+          "widgets": [
             {
-              "type": "rss-feed",
-              "title": "BBC News",
-              "url": "https://feeds.bbci.co.uk/news/rss.xml",
-              "fontScale": 2
+              "type": "playlist",
+              "defaultRssFontScale": 1.4,
+              "items": [
+                {
+                  "type": "rss-feed",
+                  "title": "BBC News",
+                  "url": "https://feeds.bbci.co.uk/news/rss.xml",
+                  "fontScale": 2
+                }
+              ]
             }
           ]
         }
       ]
     }
-  ]
-}
-```
-```
 
 ### Weather Widget Options
 
 The weather widget uses Open-Meteo and now supports current conditions and a daily forecast.
 
-```json
-{
-  "type": "weather",
-  "title": "Weather",
-  "latitude": 39.7392,
-  "longitude": -104.9903,
-  "units": "fahrenheit",
-  "useGeolocation": true,
-  "geolocationTimeoutMs": 7000,
-  "forecastDays": 5,
-  "windSpeedUnit": "mph",
-  "refreshMs": 600000
-}
-```
+    {
+      "type": "weather",
+      "title": "Weather",
+      "latitude": 39.7392,
+      "longitude": -104.9903,
+      "units": "fahrenheit",
+      "useGeolocation": true,
+      "geolocationTimeoutMs": 7000,
+      "forecastDays": 5,
+      "windSpeedUnit": "mph",
+      "refreshMs": 600000
+    }
 
 - `latitude` / `longitude`: fallback location when geolocation is denied/unavailable.
 - `useGeolocation`: if `true`, requests browser geolocation and uses it when granted.
@@ -144,49 +131,35 @@ For full step-by-step instructions and templates, see `WIDGET.md`.
 
 - Confirm Node and npm are installed:
 
-```bash
-node -v
-npm -v
-```
+    node -v
+    npm -v
 
 - If dependencies are corrupted, remove and reinstall:
 
-```bash
-rm -rf node_modules package-lock.json
-npm install
-```
+    rm -rf node_modules package-lock.json
+    npm install
 
-### 2. App does not open or render
 
-- Make sure the run command is started from the project root:
-
-```bash
-node_modules/.bin/concurrently 'npx serve' 'node cors-anywhere'
-```
-
-- Open the URL printed by `serve` in your browser.
-- Check browser dev tools console for module import errors.
-
-### 3. RSS feeds do not load
+### 2. RSS feeds do not load
 
 - Verify `rss.proxy` in `config.json` points to your local proxy (for example `http://localhost:8080/`).
 - For individual feed overrides, verify per-feed `proxy` values under playlist RSS items.
 - Confirm the RSS source URL itself is valid and publicly reachable.
 - If a feed still fails, test with another known RSS URL to isolate source issues.
 
-### 4. `Unknown widget type` appears
+### 3. `Unknown widget type` appears
 
 - Ensure the widget module path is listed in `plugins` in `config.json`.
 - Ensure the module exports `type` and `create(widget, config)`.
 - Ensure the widget `type` in panel config exactly matches the exported `type` string.
 
-### 5. Weather widget shows unavailable data
+### 4. Weather widget shows unavailable data
 
 - Confirm either valid `latitude`/`longitude` values are present, or geolocation is allowed in the browser.
 - Check internet connectivity to Open-Meteo.
 - Verify browser console for fetch/network errors.
 
-### 6. Images do not appear in playlist
+### 5. Images do not appear in playlist
 
 - Verify image paths are correct relative to the project root (for example files in `images/`).
 - Check file name casing (`Toby.png` vs `toby.png`) on case-sensitive systems.
