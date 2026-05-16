@@ -133,6 +133,7 @@ async function playRssFeed(stage, item, widget, config) {
       source: feed.source || 'rss',
       items: pageItems,
       showQr: item.showQr !== false,
+      showThumbnails: resolveRssShowThumbnails(item, widget, config),
       qrSize: item.qrSize || 120,
       fontScale: resolveRssFontScale(item, widget, config)
     });
@@ -165,6 +166,34 @@ function showRssPage(stage, data) {
     const row = document.createElement('div');
     row.className = 'rss-item';
 
+    const body = document.createElement('div');
+    body.className = 'rss-item-body';
+
+    const showThumbnails = data.showThumbnails !== false;
+    if (showThumbnails) {
+      const media = document.createElement('div');
+      media.className = 'rss-thumb-wrap';
+
+      if (item.thumbnailUrl) {
+        const thumb = document.createElement('img');
+        thumb.className = 'rss-thumb';
+        thumb.src = item.thumbnailUrl;
+        thumb.alt = item.title ? `Thumbnail for ${item.title}` : 'RSS item thumbnail';
+        thumb.loading = 'lazy';
+        thumb.onerror = () => {
+          media.innerHTML = '';
+          media.appendChild(createRssStaticFallback());
+        };
+        media.appendChild(thumb);
+      } else {
+        media.appendChild(createRssStaticFallback());
+      }
+
+      row.appendChild(media);
+    } else {
+      row.classList.add('rss-item-no-thumb');
+    }
+
     const h = document.createElement('div');
     h.className = 'rss-title';
     h.textContent = item.title || '(untitled)';
@@ -173,15 +202,17 @@ function showRssPage(stage, data) {
     d.className = 'rss-date';
     d.textContent = item.pubDate || '';
 
-    row.append(h, d);
+    body.append(h, d);
 
     const snippet = truncateWords(stripHtml(item.contentSnippet || ''), 100);
     if (snippet) {
       const s = document.createElement('div');
       s.className = 'rss-snippet';
       s.textContent = snippet;
-      row.appendChild(s);
+      body.appendChild(s);
     }
+
+    row.appendChild(body);
 
     itemsEl.appendChild(row);
   }
@@ -258,7 +289,8 @@ async function fetchFeedViaRss2Json(feedUrl) {
         title: item?.title || '(untitled)',
         link: item?.link || '',
         pubDate: item?.pubDate || '',
-        contentSnippet: item?.description || item?.content || ''
+        contentSnippet: item?.description || item?.content || '',
+        thumbnailUrl: extractThumbnailFromRss2JsonItem(item)
       }))
     };
   } catch {
@@ -282,7 +314,8 @@ function parseRssXml(xmlText, fallbackUrl = '') {
     title: item.querySelector('title')?.textContent?.trim() || '(untitled)',
     link: item.querySelector('link')?.textContent?.trim() || '',
     pubDate: item.querySelector('pubDate')?.textContent?.trim() || '',
-    contentSnippet: item.querySelector('description')?.textContent?.trim() || ''
+    contentSnippet: item.querySelector('description')?.textContent?.trim() || '',
+    thumbnailUrl: extractThumbnailFromXmlItem(item)
   }));
 
   return {
@@ -306,6 +339,18 @@ function resolveRssFontScale(item = {}, widget = {}, config = {}) {
   return Number.isFinite(scale) && scale > 0 ? scale : 1;
 }
 
+function resolveRssShowThumbnails(item = {}, widget = {}, config = {}) {
+  const raw = item.showThumbnails
+    ?? widget.defaultRssShowThumbnails
+    ?? config.rss?.showThumbnails;
+
+  if (raw === undefined) {
+    return true;
+  }
+
+  return raw !== false;
+}
+
 function buildQrUrl(value, size = 120) {
   return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}`;
 }
@@ -320,4 +365,87 @@ function truncateWords(text, maxWords) {
   const words = text.trim().split(/\s+/);
   if (words.length <= maxWords) return text.trim();
   return words.slice(0, maxWords).join(' ') + '…';
+}
+
+function createRssStaticFallback() {
+  const staticEl = document.createElement('div');
+  staticEl.className = 'rss-static-fallback';
+
+  const label = document.createElement('span');
+  label.className = 'rss-static-label';
+  label.textContent = 'NO SIGNAL';
+
+  staticEl.appendChild(label);
+  return staticEl;
+}
+
+function extractThumbnailFromRss2JsonItem(item = {}) {
+  if (typeof item?.thumbnail === 'string' && item.thumbnail.trim()) {
+    return item.thumbnail.trim();
+  }
+
+  if (typeof item?.enclosure?.link === 'string' && item.enclosure.link.trim()) {
+    return item.enclosure.link.trim();
+  }
+
+  if (typeof item?.description === 'string') {
+    const fromDescription = extractFirstImageFromHtml(item.description);
+    if (fromDescription) {
+      return fromDescription;
+    }
+  }
+
+  if (typeof item?.content === 'string') {
+    const fromContent = extractFirstImageFromHtml(item.content);
+    if (fromContent) {
+      return fromContent;
+    }
+  }
+
+  return '';
+}
+
+function extractThumbnailFromXmlItem(itemEl) {
+  const mediaThumbnail = itemEl.querySelector('media\\:thumbnail, thumbnail, thumbnail[url]');
+  const mediaThumbnailUrl = mediaThumbnail?.getAttribute('url')?.trim();
+  if (mediaThumbnailUrl) {
+    return mediaThumbnailUrl;
+  }
+
+  const mediaContent = itemEl.querySelector('media\\:content, content');
+  const mediaContentUrl = mediaContent?.getAttribute('url')?.trim();
+  if (mediaContentUrl) {
+    return mediaContentUrl;
+  }
+
+  const enclosure = itemEl.querySelector('enclosure');
+  const enclosureType = enclosure?.getAttribute('type')?.toLowerCase() || '';
+  const enclosureUrl = enclosure?.getAttribute('url')?.trim() || '';
+  if (enclosureUrl && enclosureType.startsWith('image/')) {
+    return enclosureUrl;
+  }
+
+  const descriptionHtml = itemEl.querySelector('description')?.textContent || '';
+  const descriptionImage = extractFirstImageFromHtml(descriptionHtml);
+  if (descriptionImage) {
+    return descriptionImage;
+  }
+
+  const encodedHtml = itemEl.querySelector('content\\:encoded')?.textContent || '';
+  const encodedImage = extractFirstImageFromHtml(encodedHtml);
+  if (encodedImage) {
+    return encodedImage;
+  }
+
+  return '';
+}
+
+function extractFirstImageFromHtml(html = '') {
+  if (!html.trim()) {
+    return '';
+  }
+
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const src = doc.querySelector('img')?.getAttribute('src')?.trim();
+  return src || '';
 }

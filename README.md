@@ -38,6 +38,7 @@ Primary configuration lives in `config.json`:
 - `panels`: panel definitions and per-panel `widgets`
 - `rss.proxy`: optional default proxy URL for RSS feeds
 - `rss.fontScale`: optional global RSS text scale factor (default `1`)
+- `rss.showThumbnails`: optional global RSS thumbnail toggle (default `true`)
 
 Example plugin list:
 
@@ -81,6 +82,43 @@ Example:
                   "title": "BBC News",
                   "url": "https://feeds.bbci.co.uk/news/rss.xml",
                   "fontScale": 2
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+
+### RSS Playlist Thumbnails
+
+RSS feed items can render a thumbnail when one is available.
+If an item has no image, a TV static fallback is shown.
+
+- Global default: `rss.showThumbnails`
+- Playlist-level default: `defaultRssShowThumbnails`
+- Per RSS item override: `showThumbnails`
+
+Precedence is per-item, then playlist default, then global.
+
+Example:
+
+    {
+      "rss": {
+        "showThumbnails": true
+      },
+      "panels": [
+        {
+          "widgets": [
+            {
+              "type": "playlist",
+              "defaultRssShowThumbnails": false,
+              "items": [
+                {
+                  "type": "rss-feed",
+                  "title": "BBC News",
+                  "url": "https://feeds.bbci.co.uk/news/rss.xml",
+                  "showThumbnails": true
                 }
               ]
             }

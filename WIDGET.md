@@ -287,6 +287,45 @@ Example:
 }
 ```
 
+## RSS Thumbnail Options (Playlist Widget)
+
+RSS feed items can show thumbnails when available.
+When an item has no image, a TV static fallback is rendered.
+
+- Global: `rss.showThumbnails` (default `true`)
+- Playlist default: `defaultRssShowThumbnails`
+- Per RSS item: `showThumbnails`
+
+Precedence: per-item, then playlist default, then global.
+
+Example:
+
+```json
+{
+  "rss": {
+    "showThumbnails": true
+  },
+  "panels": [
+    {
+      "widgets": [
+        {
+          "type": "playlist",
+          "defaultRssShowThumbnails": false,
+          "items": [
+            {
+              "type": "rss-feed",
+              "title": "ACM AI",
+              "url": "https://cacm.acm.org/category/artificial-intelligence-machine-learning/feed/",
+              "showThumbnails": true
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
 ## Current Widget Modules
 
 Existing widget plugins in this project:
