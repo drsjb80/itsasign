@@ -74,8 +74,28 @@
             },
             {
               "type": "rss-feed",
-              "title": "ACM AI",
+              "title": "AI",
               "url": "https://cacm.acm.org/category/artificial-intelligence-machine-learning/feed/"
+            },
+            {
+              "type": "rss-feed",
+              "title": "SE and Languages",
+              "url": "https://cacm.acm.org/category/software-engineering-and-programming-languages/feed/"
+            },
+            {
+              "type": "rss-feed",
+              "title": "Computing and Society",
+              "url": "https://cacm.acm.org/category/society/feed/"
+            },
+            {
+              "type": "rss-feed",
+              "title": "Security and Privacy",
+              "url": "https://cacm.acm.org/category/security-and-privacy/feed/"
+            },
+            {
+              "type": "rss-feed",
+              "title": "The Computing Profession",
+              "url": "https://cacm.acm.org/category/computing-profession/feed/"
             }
           ]
         }
