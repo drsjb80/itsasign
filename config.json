@@ -14,7 +14,14 @@
     "proxy": "http://localhost:8080/",
     "itemDurationMs": 2200,
     "fontScale": 2,
-    "showThumbnails": true
+    "showQR": true,
+    "showThumbnails": true,
+    "itemsPerPage": 4,
+    "maxItems": -1
+  },
+  "images": {
+    "durationMs": 10000,
+    "fit": "cover"
   },
   "layout": {
     "columns": "2fr 1fr",
@@ -27,7 +34,6 @@
       "widgets": [
         {
           "type": "playlist",
-          "defaultImageDurationMs": 60000,
           "items": [
             {
               "type": "image",
@@ -47,41 +53,29 @@
         {
           "type": "playlist",
           "title": "Content Loop",
-          "defaultImageDurationMs": 10000,
-          "defaultRssItemsPerPage": 4,
-          "defaultRssPageDurationMs": 7000,
-          "defaultRssMaxItems": 12,
-          "defaultRssShowThumbnails": true,
           "items": [
             {
               "type": "image",
               "title": "Toby",
               "src": "https://www.wpc.ncep.noaa.gov/noaa/noaa.gif",
-              "durationMs": 8000,
-              "fit": "cover"
+              "durationMs": 8000
             },
             {
               "type": "image",
               "title": "Toby",
               "src": "http://sites.msudenver.edu/beatys/wp-content/uploads/sites/461/2026/04/Toby-scaled.png",
-              "durationMs": 8000,
-              "fit": "cover"
+              "durationMs": 8000
             },
 
             {
               "type": "rss-feed",
               "title": "BBC News",
-              "url": "https://feeds.bbci.co.uk/news/rss.xml",
-              "maxItems": -1,
-              "showQr": true
+              "url": "https://feeds.bbci.co.uk/news/rss.xml"
             },
             {
               "type": "rss-feed",
               "title": "ACM AI",
-              "url":
-              "https://cacm.acm.org/category/artificial-intelligence-machine-learning/feed/",
-              "maxItems": -1,
-              "showQr": true
+              "url": "https://cacm.acm.org/category/artificial-intelligence-machine-learning/feed/"
             }
           ]
         }

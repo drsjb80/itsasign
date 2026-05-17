@@ -38,7 +38,12 @@ Primary configuration lives in `config.json`:
 - `panels`: panel definitions and per-panel `widgets`
 - `rss.proxy`: optional default proxy URL for RSS feeds
 - `rss.fontScale`: optional global RSS text scale factor (default `1`)
+- `rss.showQR`: optional global RSS QR toggle (default `true`)
 - `rss.showThumbnails`: optional global RSS thumbnail toggle (default `true`)
+- `rss.itemsPerPage`: optional global RSS page size (default `3`)
+- `rss.maxItems`: optional global RSS item cap (default `12`)
+- `images.durationMs`: optional global image duration default (default `10000`)
+- `images.fit`: optional global image fit default (default `cover`)
 
 Example plugin list:
 
@@ -58,10 +63,9 @@ RSS feed text uses original base sizes by default (`fontScale: 1`).
 You can scale all RSS text with these options:
 
 - Global default: `rss.fontScale`
-- Playlist-level default: `defaultRssFontScale`
 - Per RSS item override: `fontScale`
 
-Precedence is per-item, then playlist default, then global.
+Precedence is per-item, then global.
 
 Example:
 
@@ -75,7 +79,6 @@ Example:
           "widgets": [
             {
               "type": "playlist",
-              "defaultRssFontScale": 1.4,
               "items": [
                 {
                   "type": "rss-feed",
@@ -96,10 +99,8 @@ RSS feed items can render a thumbnail when one is available.
 If an item has no image, a TV static fallback is shown.
 
 - Global default: `rss.showThumbnails`
-- Playlist-level default: `defaultRssShowThumbnails`
-- Per RSS item override: `showThumbnails`
 
-Precedence is per-item, then playlist default, then global.
+Precedence is per-item, then global.
 
 Example:
 
@@ -112,7 +113,6 @@ Example:
           "widgets": [
             {
               "type": "playlist",
-              "defaultRssShowThumbnails": false,
               "items": [
                 {
                   "type": "rss-feed",
@@ -126,6 +126,26 @@ Example:
         }
       ]
     }
+
+  ### RSS QR Toggle
+
+  RSS feed slides can show a QR code that links to the feed URL.
+
+  - Global default: `rss.showQR`
+  - Per RSS item override: `showQR`
+
+  Precedence is per-item, then global.
+
+### Image Defaults
+
+Image playlist items can use global defaults for slide duration and fit.
+The full-width header strip still uses `contain` so it shows the whole image without cropping.
+
+  - Global default: `images.durationMs`
+  - Global default: `images.fit`
+  - Per image override: `durationMs`, `fit`
+
+Precedence is per-item, then global.
 
 ### Weather Widget Options
 

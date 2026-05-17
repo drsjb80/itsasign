@@ -1,3 +1,4 @@
 npm install
+chromium --password-store=basic 'http://localhost:3000'
 chromium --kiosk --password-store=basic 'http://localhost:3000'
 chromium --start-maximized --password-store=basic 'http://localhost:3000'

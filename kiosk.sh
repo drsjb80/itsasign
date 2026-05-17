@@ -5,10 +5,8 @@ set -x
 
 sleep 15
 
-export HOME=/home/pi
 export XDG_RUNTIME_DIR=/run/user/$(id -u)
 export WAYLAND_DISPLAY=wayland-0
-export PATH=/usr/local/bin:/usr/bin:/bin
 
 # --- Go to project directory ---
 PROJECT_DIR="$HOME/src/itsasign"
@@ -32,10 +30,10 @@ lxterminal &
 pkill node || true
 
 # --- Start local server ---
-/usr/bin/npx serve >> /tmp/npx_serve 2>&1 &
+npx serve >> /tmp/npx_serve 2>&1 &
 
 # --- Start CORS proxy ---
-/usr/bin/node cors-anywhere >> /tmp/cors-anywhere 2>&1 &
+node cors-anywhere >> /tmp/cors-anywhere 2>&1 &
 
 # --- Wait for server ---
 COUNT=0

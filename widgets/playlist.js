@@ -34,15 +34,15 @@ export function create(widget, config) {
     meta.innerHTML = `<span>${escapeHtml(left)}</span><span>${escapeHtml(right)}</span>`;
 
     if (item.type === 'image') {
-      const duration = item.durationMs || widget.defaultImageDurationMs || 10000;
-      showImageSlide(stage, item);
+      const duration = resolveImageDurationMs(item, config);
+      showImageSlide(stage, item, config);
       itemIndex = (itemIndex + 1) % items.length;
       setTimeout(playNext, duration);
       return;
     }
 
     if (item.type === 'rss-feed') {
-      await playRssFeed(stage, item, widget, config);
+      await playRssFeed(stage, item, config);
       itemIndex = (itemIndex + 1) % items.length;
       setTimeout(playNext, 25);
       return;
@@ -62,7 +62,7 @@ export function create(widget, config) {
   return el;
 }
 
-function showImageSlide(stage, item) {
+function showImageSlide(stage, item, config = {}) {
   stage.innerHTML = '';
   const slide = document.createElement('div');
   slide.className = 'playlist-slide';
@@ -79,19 +79,36 @@ function showImageSlide(stage, item) {
       asHtml: true
     });
   };
-  if (item.fit === 'contain') {
-    img.style.objectFit = 'contain';
+  const fit = resolveImageFit(item, config);
+  if (fit) {
+    img.style.objectFit = fit;
   }
 
   slide.appendChild(img);
   stage.appendChild(slide);
 }
 
-async function playRssFeed(stage, item, widget, config) {
+function resolveImageDurationMs(item = {}, config = {}) {
+  const raw = item.durationMs
+    ?? config.images?.durationMs
+    ?? 10000;
+
+  const durationMs = Number(raw);
+  return Number.isFinite(durationMs) && durationMs > 0 ? durationMs : 10000;
+}
+
+function resolveImageFit(item = {}, config = {}) {
+  return item.fit
+    ?? config.images?.fit
+    ?? 'cover';
+}
+
+async function playRssFeed(stage, item, config) {
   const feedUrl = item.url;
-  const pageSize = item.itemsPerPage || widget.defaultRssItemsPerPage || 3;
+  const pageSize = item.itemsPerPage
+    || config.rss?.itemsPerPage
+    || 3;
   const itemDurationMs = item.itemDurationMs
-    || widget.defaultRssItemDurationMs
     || config.rss?.itemDurationMs
     || 2000;
 
@@ -110,7 +127,9 @@ async function playRssFeed(stage, item, widget, config) {
     return;
   }
 
-  const maxItems = item.maxItems ?? widget.defaultRssMaxItems ?? 12;
+  const maxItems = item.maxItems
+    ?? config.rss?.maxItems
+    ?? 12;
   const limit = maxItems <= 0 ? Infinity : maxItems;
   const allItems = (feed.items || []).slice(0, limit);
   if (!allItems.length) {
@@ -127,16 +146,16 @@ async function playRssFeed(stage, item, widget, config) {
   for (let start = 0; start < allItems.length; start += pageSize) {
     const pageItems = allItems.slice(start, start + pageSize);
     const pageDurationMs = itemDurationMs * pageItems.length;
-    showRssPage(stage, {
-      title: item.title || feed.feed?.title || 'RSS Feed',
-      url: feedUrl,
-      source: feed.source || 'rss',
-      items: pageItems,
-      showQr: item.showQr !== false,
-      showThumbnails: resolveRssShowThumbnails(item, widget, config),
-      qrSize: item.qrSize || 120,
-      fontScale: resolveRssFontScale(item, widget, config)
-    });
+      showRssPage(stage, {
+        title: item.title || feed.feed?.title || 'RSS Feed',
+        url: feedUrl,
+        source: feed.source || 'rss',
+        items: pageItems,
+        showQR: resolveRssShowQR(item, config),
+        showThumbnails: resolveRssShowThumbnails(item, config),
+        qrSize: item.qrSize || 120,
+        fontScale: resolveRssFontScale(item, config)
+      });
     await wait(pageDurationMs);
   }
 }
@@ -190,8 +209,6 @@ function showRssPage(stage, data) {
       }
 
       row.appendChild(media);
-    } else {
-      row.classList.add('rss-item-no-thumb');
     }
 
     const h = document.createElement('div');
@@ -220,7 +237,7 @@ function showRssPage(stage, data) {
   main.append(title, url, itemsEl);
   slide.appendChild(main);
 
-  if (data.showQr) {
+  if (data.showQR) {
     const qrWrap = document.createElement('div');
     qrWrap.className = 'rss-qr-wrap';
 
@@ -329,9 +346,8 @@ function parseRssXml(xmlText, fallbackUrl = '') {
   };
 }
 
-function resolveRssFontScale(item = {}, widget = {}, config = {}) {
+function resolveRssFontScale(item = {}, config = {}) {
   const raw = item.fontScale
-    ?? widget.defaultRssFontScale
     ?? config.rss?.fontScale
     ?? 1;
 
@@ -339,10 +355,20 @@ function resolveRssFontScale(item = {}, widget = {}, config = {}) {
   return Number.isFinite(scale) && scale > 0 ? scale : 1;
 }
 
-function resolveRssShowThumbnails(item = {}, widget = {}, config = {}) {
+function resolveRssShowThumbnails(item = {}, config = {}) {
   const raw = item.showThumbnails
-    ?? widget.defaultRssShowThumbnails
     ?? config.rss?.showThumbnails;
+
+  if (raw === undefined) {
+    return true;
+  }
+
+  return raw !== false;
+}
+
+function resolveRssShowQR(item = {}, config = {}) {
+  const raw = item.showQR
+    ?? config.rss?.showQR;
 
   if (raw === undefined) {
     return true;
@@ -371,11 +397,13 @@ function createRssStaticFallback() {
   const staticEl = document.createElement('div');
   staticEl.className = 'rss-static-fallback';
 
-  const label = document.createElement('span');
-  label.className = 'rss-static-label';
-  label.textContent = 'NO SIGNAL';
+  const image = document.createElement('img');
+  image.className = 'rss-static-image';
+  image.src = 'images/SMPTE_Color_Bars.svg';
+  image.alt = 'Fallback color bars';
+  image.loading = 'lazy';
 
-  staticEl.appendChild(label);
+  staticEl.appendChild(image);
   return staticEl;
 }
 

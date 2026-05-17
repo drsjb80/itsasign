@@ -2,7 +2,7 @@
 
 The optional full-width header strip is configured via `headerEnabled` in `config.json`.
 
-The header height is fixed at whatever value is set in `layout.rows` (e.g. `"160px 1fr"`). The image is displayed with `fit: contain`, so the **entire image is shown without cropping**.
+The header height is fixed at whatever value is set in `layout.rows` (e.g. `"160px 1fr"`). The image is displayed with `fit: contain`, so the **entire image is shown without cropping**. This header override does not use the global `images.fit` default.
 
 ### Recommended image dimensions
 
@@ -254,10 +254,9 @@ App-side usage note:
 The playlist RSS slide supports a text scale factor while keeping original default sizes.
 
 - Global: `rss.fontScale` (default `1`)
-- Playlist default: `defaultRssFontScale`
 - Per RSS item: `fontScale`
 
-Precedence: per-item, then playlist default, then global.
+Precedence: per-item, then global.
 
 Example:
 
@@ -271,7 +270,6 @@ Example:
       "widgets": [
         {
           "type": "playlist",
-          "defaultRssFontScale": 1.5,
           "items": [
             {
               "type": "rss-feed",
@@ -293,10 +291,9 @@ RSS feed items can show thumbnails when available.
 When an item has no image, a TV static fallback is rendered.
 
 - Global: `rss.showThumbnails` (default `true`)
-- Playlist default: `defaultRssShowThumbnails`
 - Per RSS item: `showThumbnails`
 
-Precedence: per-item, then playlist default, then global.
+Precedence: per-item, then global.
 
 Example:
 
@@ -310,7 +307,6 @@ Example:
       "widgets": [
         {
           "type": "playlist",
-          "defaultRssShowThumbnails": false,
           "items": [
             {
               "type": "rss-feed",
@@ -325,6 +321,35 @@ Example:
   ]
 }
 ```
+
+## RSS Pagination And Limits (Playlist Widget)
+
+You can define global defaults in `rss` config for item paging and limits.
+
+- Global: `rss.itemsPerPage` (default `3`)
+- Global: `rss.maxItems` (default `12`)
+- Per RSS item overrides: `itemsPerPage`, `maxItems`
+
+Precedence: per-item, then global.
+
+## RSS QR Options (Playlist Widget)
+
+RSS feed slides can display a QR code that points at the feed URL.
+
+- Global: `rss.showQR` (default `true`)
+- Per RSS item: `showQR`
+
+Precedence: per-item, then global.
+
+## Image Defaults (Playlist Widget)
+
+Image playlist items can use global defaults for slide duration and fit.
+
+- Global: `images.durationMs` (default `10000`)
+- Global: `images.fit` (default `cover`)
+- Per image: `durationMs`, `fit`
+
+Precedence: per-item, then global.
 
 ## Current Widget Modules
 
