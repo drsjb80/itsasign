@@ -1,4 +1,4 @@
-[Screenshot](https://github.com/drsjb80/itsasign/blob/main/Screenshot.png)
+[![Screenshot](Screenshot.png)](Screenshot.png)
 
 # ItsaSign
 
