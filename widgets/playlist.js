@@ -34,15 +34,15 @@ export function create(widget, config) {
     meta.innerHTML = `<span>${escapeHtml(left)}</span><span>${escapeHtml(right)}</span>`;
 
     if (item.type === 'image') {
-      const duration = item.durationMs || widget.defaultImageDurationMs || 10000;
-      showImageSlide(stage, item);
+      const duration = resolveImageDurationMs(item, config);
+      showImageSlide(stage, item, config);
       itemIndex = (itemIndex + 1) % items.length;
       setTimeout(playNext, duration);
       return;
     }
 
     if (item.type === 'rss-feed') {
-      await playRssFeed(stage, item, widget, config);
+      await playRssFeed(stage, item, config);
       itemIndex = (itemIndex + 1) % items.length;
       setTimeout(playNext, 25);
       return;
@@ -62,7 +62,7 @@ export function create(widget, config) {
   return el;
 }
 
-function showImageSlide(stage, item) {
+function showImageSlide(stage, item, config = {}) {
   stage.innerHTML = '';
   const slide = document.createElement('div');
   slide.className = 'playlist-slide';
@@ -79,19 +79,36 @@ function showImageSlide(stage, item) {
       asHtml: true
     });
   };
-  if (item.fit === 'contain') {
-    img.style.objectFit = 'contain';
+  const fit = resolveImageFit(item, config);
+  if (fit) {
+    img.style.objectFit = fit;
   }
 
   slide.appendChild(img);
   stage.appendChild(slide);
 }
 
-async function playRssFeed(stage, item, widget, config) {
+function resolveImageDurationMs(item = {}, config = {}) {
+  const raw = item.durationMs
+    ?? config.images?.durationMs
+    ?? 10000;
+
+  const durationMs = Number(raw);
+  return Number.isFinite(durationMs) && durationMs > 0 ? durationMs : 10000;
+}
+
+function resolveImageFit(item = {}, config = {}) {
+  return item.fit
+    ?? config.images?.fit
+    ?? 'cover';
+}
+
+async function playRssFeed(stage, item, config) {
   const feedUrl = item.url;
-  const pageSize = item.itemsPerPage || widget.defaultRssItemsPerPage || 3;
+  const pageSize = item.itemsPerPage
+    || config.rss?.itemsPerPage
+    || 3;
   const itemDurationMs = item.itemDurationMs
-    || widget.defaultRssItemDurationMs
     || config.rss?.itemDurationMs
     || 2000;
 
@@ -110,7 +127,9 @@ async function playRssFeed(stage, item, widget, config) {
     return;
   }
 
-  const maxItems = item.maxItems ?? widget.defaultRssMaxItems ?? 12;
+  const maxItems = item.maxItems
+    ?? config.rss?.maxItems
+    ?? 12;
   const limit = maxItems <= 0 ? Infinity : maxItems;
   const allItems = (feed.items || []).slice(0, limit);
   if (!allItems.length) {
@@ -127,15 +146,16 @@ async function playRssFeed(stage, item, widget, config) {
   for (let start = 0; start < allItems.length; start += pageSize) {
     const pageItems = allItems.slice(start, start + pageSize);
     const pageDurationMs = itemDurationMs * pageItems.length;
-    showRssPage(stage, {
-      title: item.title || feed.feed?.title || 'RSS Feed',
-      url: feedUrl,
-      source: feed.source || 'rss',
-      items: pageItems,
-      showQr: item.showQr !== false,
-      qrSize: item.qrSize || 120,
-      fontScale: resolveRssFontScale(item, widget, config)
-    });
+      showRssPage(stage, {
+        title: item.title || feed.feed?.title || 'RSS Feed',
+        url: feedUrl,
+        source: feed.source || 'rss',
+        items: pageItems,
+        showQR: resolveRssShowQR(item, config),
+        showThumbnails: resolveRssShowThumbnails(item, config),
+        qrSize: item.qrSize || 120,
+        fontScale: resolveRssFontScale(item, config)
+      });
     await wait(pageDurationMs);
   }
 }
@@ -165,6 +185,32 @@ function showRssPage(stage, data) {
     const row = document.createElement('div');
     row.className = 'rss-item';
 
+    const body = document.createElement('div');
+    body.className = 'rss-item-body';
+
+    const showThumbnails = data.showThumbnails !== false;
+    if (showThumbnails) {
+      const media = document.createElement('div');
+      media.className = 'rss-thumb-wrap';
+
+      if (item.thumbnailUrl) {
+        const thumb = document.createElement('img');
+        thumb.className = 'rss-thumb';
+        thumb.src = item.thumbnailUrl;
+        thumb.alt = item.title ? `Thumbnail for ${item.title}` : 'RSS item thumbnail';
+        thumb.loading = 'lazy';
+        thumb.onerror = () => {
+          media.innerHTML = '';
+          media.appendChild(createRssStaticFallback());
+        };
+        media.appendChild(thumb);
+      } else {
+        media.appendChild(createRssStaticFallback());
+      }
+
+      row.appendChild(media);
+    }
+
     const h = document.createElement('div');
     h.className = 'rss-title';
     h.textContent = item.title || '(untitled)';
@@ -173,15 +219,17 @@ function showRssPage(stage, data) {
     d.className = 'rss-date';
     d.textContent = item.pubDate || '';
 
-    row.append(h, d);
+    body.append(h, d);
 
     const snippet = truncateWords(stripHtml(item.contentSnippet || ''), 100);
     if (snippet) {
       const s = document.createElement('div');
       s.className = 'rss-snippet';
       s.textContent = snippet;
-      row.appendChild(s);
+      body.appendChild(s);
     }
+
+    row.appendChild(body);
 
     itemsEl.appendChild(row);
   }
@@ -189,7 +237,7 @@ function showRssPage(stage, data) {
   main.append(title, url, itemsEl);
   slide.appendChild(main);
 
-  if (data.showQr) {
+  if (data.showQR) {
     const qrWrap = document.createElement('div');
     qrWrap.className = 'rss-qr-wrap';
 
@@ -258,7 +306,8 @@ async function fetchFeedViaRss2Json(feedUrl) {
         title: item?.title || '(untitled)',
         link: item?.link || '',
         pubDate: item?.pubDate || '',
-        contentSnippet: item?.description || item?.content || ''
+        contentSnippet: item?.description || item?.content || '',
+        thumbnailUrl: extractThumbnailFromRss2JsonItem(item)
       }))
     };
   } catch {
@@ -282,7 +331,8 @@ function parseRssXml(xmlText, fallbackUrl = '') {
     title: item.querySelector('title')?.textContent?.trim() || '(untitled)',
     link: item.querySelector('link')?.textContent?.trim() || '',
     pubDate: item.querySelector('pubDate')?.textContent?.trim() || '',
-    contentSnippet: item.querySelector('description')?.textContent?.trim() || ''
+    contentSnippet: item.querySelector('description')?.textContent?.trim() || '',
+    thumbnailUrl: extractThumbnailFromXmlItem(item)
   }));
 
   return {
@@ -296,14 +346,35 @@ function parseRssXml(xmlText, fallbackUrl = '') {
   };
 }
 
-function resolveRssFontScale(item = {}, widget = {}, config = {}) {
+function resolveRssFontScale(item = {}, config = {}) {
   const raw = item.fontScale
-    ?? widget.defaultRssFontScale
     ?? config.rss?.fontScale
     ?? 1;
 
   const scale = Number(raw);
   return Number.isFinite(scale) && scale > 0 ? scale : 1;
+}
+
+function resolveRssShowThumbnails(item = {}, config = {}) {
+  const raw = item.showThumbnails
+    ?? config.rss?.showThumbnails;
+
+  if (raw === undefined) {
+    return true;
+  }
+
+  return raw !== false;
+}
+
+function resolveRssShowQR(item = {}, config = {}) {
+  const raw = item.showQR
+    ?? config.rss?.showQR;
+
+  if (raw === undefined) {
+    return true;
+  }
+
+  return raw !== false;
 }
 
 function buildQrUrl(value, size = 120) {
@@ -320,4 +391,89 @@ function truncateWords(text, maxWords) {
   const words = text.trim().split(/\s+/);
   if (words.length <= maxWords) return text.trim();
   return words.slice(0, maxWords).join(' ') + '…';
+}
+
+function createRssStaticFallback() {
+  const staticEl = document.createElement('div');
+  staticEl.className = 'rss-static-fallback';
+
+  const image = document.createElement('img');
+  image.className = 'rss-static-image';
+  image.src = 'images/SMPTE_Color_Bars.svg';
+  image.alt = 'Fallback color bars';
+  image.loading = 'lazy';
+
+  staticEl.appendChild(image);
+  return staticEl;
+}
+
+function extractThumbnailFromRss2JsonItem(item = {}) {
+  if (typeof item?.thumbnail === 'string' && item.thumbnail.trim()) {
+    return item.thumbnail.trim();
+  }
+
+  if (typeof item?.enclosure?.link === 'string' && item.enclosure.link.trim()) {
+    return item.enclosure.link.trim();
+  }
+
+  if (typeof item?.description === 'string') {
+    const fromDescription = extractFirstImageFromHtml(item.description);
+    if (fromDescription) {
+      return fromDescription;
+    }
+  }
+
+  if (typeof item?.content === 'string') {
+    const fromContent = extractFirstImageFromHtml(item.content);
+    if (fromContent) {
+      return fromContent;
+    }
+  }
+
+  return '';
+}
+
+function extractThumbnailFromXmlItem(itemEl) {
+  const mediaThumbnail = itemEl.querySelector('media\\:thumbnail, thumbnail, thumbnail[url]');
+  const mediaThumbnailUrl = mediaThumbnail?.getAttribute('url')?.trim();
+  if (mediaThumbnailUrl) {
+    return mediaThumbnailUrl;
+  }
+
+  const mediaContent = itemEl.querySelector('media\\:content, content');
+  const mediaContentUrl = mediaContent?.getAttribute('url')?.trim();
+  if (mediaContentUrl) {
+    return mediaContentUrl;
+  }
+
+  const enclosure = itemEl.querySelector('enclosure');
+  const enclosureType = enclosure?.getAttribute('type')?.toLowerCase() || '';
+  const enclosureUrl = enclosure?.getAttribute('url')?.trim() || '';
+  if (enclosureUrl && enclosureType.startsWith('image/')) {
+    return enclosureUrl;
+  }
+
+  const descriptionHtml = itemEl.querySelector('description')?.textContent || '';
+  const descriptionImage = extractFirstImageFromHtml(descriptionHtml);
+  if (descriptionImage) {
+    return descriptionImage;
+  }
+
+  const encodedHtml = itemEl.querySelector('content\\:encoded')?.textContent || '';
+  const encodedImage = extractFirstImageFromHtml(encodedHtml);
+  if (encodedImage) {
+    return encodedImage;
+  }
+
+  return '';
+}
+
+function extractFirstImageFromHtml(html = '') {
+  if (!html.trim()) {
+    return '';
+  }
+
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const src = doc.querySelector('img')?.getAttribute('src')?.trim();
+  return src || '';
 }
