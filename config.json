@@ -54,19 +54,13 @@
           "type": "playlist",
           "title": "Content Loop",
           "items": [
-            {
-              "type": "image",
-              "title": "Toby",
-              "src": "https://www.wpc.ncep.noaa.gov/noaa/noaa.gif",
-              "durationMs": 8000
-            },
+            
             {
               "type": "image",
               "title": "Toby",
               "src": "http://sites.msudenver.edu/beatys/wp-content/uploads/sites/461/2026/04/Toby-scaled.png",
               "durationMs": 8000
             },
-
             {
               "type": "rss-feed",
               "title": "BBC News",
@@ -78,9 +72,21 @@
               "url": "https://cacm.acm.org/category/artificial-intelligence-machine-learning/feed/"
             },
             {
+              "type": "image",
+              "title": "NOAA",
+              "src": "https://www.wpc.ncep.noaa.gov/noaa/noaa.gif",
+              "durationMs": 8000
+            },
+            {
               "type": "rss-feed",
               "title": "SE and Languages",
               "url": "https://cacm.acm.org/category/software-engineering-and-programming-languages/feed/"
+            },
+            {
+              "type": "image",
+              "title": "XKCD",
+              "src": "http://localhost:3000/XKCD.png",
+              "durationMs": 8000
             },
             {
               "type": "rss-feed",
@@ -130,11 +136,6 @@
         {
           "type": "moon",
           "title": "Moon",
-          "refreshMs": 3600000
-        },
-        {
-          "type": "xkcd",
-          "title": "XKCD",
           "refreshMs": 3600000
         },
         {
