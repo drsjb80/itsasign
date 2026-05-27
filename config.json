@@ -6,7 +6,6 @@
     "./widgets/daydate.js",
     "./widgets/weather.js",
     "./widgets/playlist.js",
-    "./widgets/xkcd.js",
     "./widgets/moon.js",
     "./widgets/qotd.js"
   ],
