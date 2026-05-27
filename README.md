@@ -1,3 +1,5 @@
+[![Screenshot](Screenshot.png)](Screenshot.png)
+
 # ItsaSign
 
 ItsaSign is an extensible digital signage application that renders configurable panels and widget plugins in the browser.
