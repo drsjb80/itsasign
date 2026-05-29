@@ -170,6 +170,12 @@ function showRssPage(stage, data) {
   const main = document.createElement('div');
   main.className = 'rss-main';
 
+  const header = document.createElement('div');
+  header.className = 'rss-header';
+
+  const headerText = document.createElement('div');
+  headerText.className = 'rss-header-text';
+
   const title = document.createElement('div');
   title.className = 'rss-feed-title';
   title.textContent = data.title;
@@ -177,6 +183,25 @@ function showRssPage(stage, data) {
   const url = document.createElement('div');
   url.className = 'rss-feed-url';
   url.textContent = data.url;
+
+  headerText.append(title, url);
+  header.appendChild(headerText);
+
+  if (data.showQR) {
+    const qrWrap = document.createElement('div');
+    qrWrap.className = 'rss-qr-wrap';
+
+    const qr = document.createElement('img');
+    qr.alt = 'QR code for feed';
+    qr.src = buildQrUrl(data.url, data.qrSize);
+
+    const label = document.createElement('div');
+    label.className = 'rss-qr-label';
+    label.textContent = 'Scan feed';
+
+    qrWrap.append(qr, label);
+    header.appendChild(qrWrap);
+  }
 
   const itemsEl = document.createElement('div');
   itemsEl.className = 'rss-items';
@@ -221,38 +246,21 @@ function showRssPage(stage, data) {
 
     body.append(h, d);
 
+    row.appendChild(body);
+
     const snippet = truncateWords(stripHtml(item.contentSnippet || ''), 100);
     if (snippet) {
       const s = document.createElement('div');
       s.className = 'rss-snippet';
       s.textContent = snippet;
-      body.appendChild(s);
+      row.appendChild(s);
     }
-
-    row.appendChild(body);
 
     itemsEl.appendChild(row);
   }
 
-  main.append(title, url, itemsEl);
+  main.append(header, itemsEl);
   slide.appendChild(main);
-
-  if (data.showQR) {
-    const qrWrap = document.createElement('div');
-    qrWrap.className = 'rss-qr-wrap';
-
-    const qr = document.createElement('img');
-    qr.alt = 'QR code';
-    qr.src = buildQrUrl(data.url, data.qrSize);
-
-    const label = document.createElement('div');
-    label.className = 'rss-qr-label';
-    label.textContent = 'Scan feed';
-
-    qrWrap.append(qr, label);
-    slide.appendChild(qrWrap);
-  }
-
   stage.appendChild(slide);
 }
 

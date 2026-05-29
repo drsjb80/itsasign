@@ -27,7 +27,7 @@ ItsaSign is an extensible digital signage application that renders configurable 
 
 Copy `kiosk.sh` to `~/scripts/`
 
-Cope `kiosk.desktop` to `~/.config/autostart`
+Copy `kiosk.desktop` to `~/.config/autostart`
 
 Reboot.
 
