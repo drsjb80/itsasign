@@ -5,17 +5,35 @@
   margin: 4px auto 8px;
   border-radius: 50%;
   object-fit: cover;
+  background-color: var(--panel-1);
+  opacity: 1;
+  transition: opacity 0.3s ease;
 }
 
-.moon-phase-name {
+.moon-image[src=''],
+.moon-image:not([src]) {
+  opacity: 0.5;
+}
+
+.moon-date {
   text-align: center;
-  font-weight: bold;
-  font-size: 0.95rem;
+  color: var(--muted);
+  font-size: 0.82rem;
+  margin-top: 4px;
+  font-family: monospace;
 }
 
 .moon-age {
   text-align: center;
   color: var(--muted);
   font-size: 0.82rem;
+  margin-top: 2px;
+}
+
+.moon-error {
+  text-align: center;
+  color: var(--error, #ff4444);
+  font-size: 0.82rem;
   margin-top: 4px;
+  font-weight: bold;
 }

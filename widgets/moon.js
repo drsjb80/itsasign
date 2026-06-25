@@ -1,7 +1,8 @@
-import { createCard } from './utils.js';
+import { createCard, reportWidgetError } from './utils.js';
 
 export const type = 'moon';
 
+const NASA_SVS_BASE = 'https://svs.gsfc.nasa.gov/vis/a000000/a005500/a005587/frames/730x730_1x1_30p/moon.';
 const SYNODIC_MONTH_DAYS = 29.53058867;
 const REFERENCE_NEW_MOON_JD = 2451550.1; // 2000-01-06 18:14 UTC
 
@@ -10,27 +11,45 @@ export function create(widget) {
 
   const image = document.createElement('img');
   image.className = 'moon-image';
-  image.alt = 'Current moon phase icon';
+  image.alt = 'Current moon appearance';
 
-  const phaseName = document.createElement('div');
-  phaseName.className = 'moon-phase-name';
-  phaseName.textContent = 'Loading moon phase...';
+  const date = document.createElement('div');
+  date.className = 'moon-date';
+  date.textContent = 'Loading...';
 
   const age = document.createElement('div');
   age.className = 'moon-age';
-  age.textContent = '-- days old';
+  age.textContent = '';
 
-  el.append(image, phaseName, age);
+  const error = document.createElement('div');
+  error.className = 'moon-error';
+  error.style.display = 'none';
+
+  el.append(image, date, age, error);
 
   function render() {
     const now = new Date();
-    const phase = calculateMoonPhase(now);
-    const details = phaseDetails(phase.ageDays);
+    const frameNum = calculateFrameNumber(now);
+    const frameStr = String(frameNum).padStart(4, '0');
+    const imageUrl = NASA_SVS_BASE + frameStr + '.jpg';
 
-    image.src = details.imageUrl;
-    image.alt = details.name;
-    phaseName.textContent = details.name;
-    age.textContent = `${phase.ageDays.toFixed(1)} days old`;
+    image.src = imageUrl;
+    image.onerror = () => {
+      error.textContent = 'Failed to load moon image';
+      error.style.display = 'block';
+      reportWidgetError({
+        widgetType: 'moon',
+        message: `Failed to load frame ${frameStr}`,
+        target: error
+      });
+    };
+
+    const dateStr = formatDate(now);
+    const moonAge = calculateMoonAge(now);
+
+    date.textContent = dateStr;
+    age.textContent = `Age: ${moonAge.toFixed(1)} days`;
+    error.style.display = 'none';
   }
 
   render();
@@ -39,34 +58,31 @@ export function create(widget) {
   return el;
 }
 
-function calculateMoonPhase(date) {
-  const julianDay = (date.getTime() / 86400000) + 2440587.5;
-  const phaseDays = positiveModulo(julianDay - REFERENCE_NEW_MOON_JD, SYNODIC_MONTH_DAYS);
-  const fraction = phaseDays / SYNODIC_MONTH_DAYS;
+function calculateFrameNumber(date) {
+  // Calculate day of year (1-365/366)
+  const startOfYear = new Date(date.getFullYear(), 0, 1);
+  const dayOfYear = Math.floor((date - startOfYear) / (24 * 60 * 60 * 1000)) + 1;
 
-  return {
-    ageDays: phaseDays,
-    fraction
-  };
+  // Get hour of day (0-23)
+  const hour = date.getHours();
+
+  // Frame number = (dayOfYear - 1) × 24 + hour + 1
+  // +1 at the end because frames are 1-indexed (0001 not 0000)
+  return (dayOfYear - 1) * 24 + hour + 1;
 }
 
-function phaseDetails(ageDays) {
-  const dayIndex = Math.min(Math.round(ageDays), 28);
-  const padded = String(dayIndex).padStart(2, '0');
-  const imageUrl = `./images/moon-${padded}.jpg`;
+function calculateMoonAge(date) {
+  const julianDay = (date.getTime() / 86400000) + 2440587.5;
+  const phaseDays = positiveModulo(julianDay - REFERENCE_NEW_MOON_JD, SYNODIC_MONTH_DAYS);
+  return phaseDays;
+}
 
-  const fraction = ageDays / SYNODIC_MONTH_DAYS;
-  let name;
-  if (fraction < 0.0625 || fraction >= 0.9375) name = 'New Moon';
-  else if (fraction < 0.1875) name = 'Waxing Crescent';
-  else if (fraction < 0.3125) name = 'First Quarter';
-  else if (fraction < 0.4375) name = 'Waxing Gibbous';
-  else if (fraction < 0.5625) name = 'Full Moon';
-  else if (fraction < 0.6875) name = 'Waning Gibbous';
-  else if (fraction < 0.8125) name = 'Last Quarter';
-  else name = 'Waning Crescent';
-
-  return { name, imageUrl };
+function formatDate(date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const hour = String(date.getHours()).padStart(2, '0');
+  const minute = String(date.getMinutes()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day} ${hour}:${minute}`;
 }
 
 function positiveModulo(value, mod) {
