@@ -49,6 +49,8 @@ function normalizeEncodedProxyUrl(reqUrl) {
 }
 
 http.createServer(function(req, res) {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+
   if (isIpRequest(req.url)) {
     var ip = getLocalIp();
     res.writeHead(200, {
@@ -62,6 +64,10 @@ http.createServer(function(req, res) {
   if (!req.headers['user-agent']) {
     req.headers['user-agent'] = 'Mozilla/5.0 (compatible; itsasign/1.0)';
   }
+
+  // Log the proxied URL
+  console.log(`  → Proxying to: ${req.url}`);
+
   proxy.emit('request', req, res);
 }).listen(port, host, function() {
     console.log('Running CORS Anywhere on ' + host + ':' + port);
