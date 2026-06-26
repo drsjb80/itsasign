@@ -52,8 +52,6 @@
 
     function renderApp(config, plugins) {
       const app = document.getElementById('app');
-      app.style.gridTemplateColumns = config.layout?.columns || '2fr 1fr';
-      app.style.gridTemplateRows = config.layout?.rows || '1fr';
 
       const panels = (config.panels || []).filter(p => {
         if (p.className === 'header-strip' && !config.headerEnabled) return false;

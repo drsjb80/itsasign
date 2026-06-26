@@ -1,11 +1,18 @@
 :root {
-  --bg: #0f172a;
-  --panel: #111827;
-  --panel-2: #1f2937;
-  --text: #f8fafc;
-  --muted: #cbd5e1;
-  --gap: 12px;
-  --radius: 12px;
+  --bg: midnightblue;
+  --panel: darkslategray;
+  --panel-2: dimgray;
+  --text: white;
+  --muted: lightgray;
+
+  --spacing-xs: 0.25rem;
+  --spacing-sm: 0.5rem;
+  --spacing-md: 0.75rem;
+  --spacing-lg: 1rem;
+  --spacing-xl: 1.5rem;
+  --gap: var(--spacing-md);
+  --radius: 0.75rem;
+  --header-height: 10rem;
 }
 
 * { box-sizing: border-box; }
@@ -26,6 +33,46 @@ html, body {
   display: grid;
   gap: var(--gap);
   padding: var(--gap);
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: var(--header-height) 1fr;
+}
+
+@media (max-aspect-ratio: 1/1) {
+  #app {
+    grid-template-columns: 2fr 1fr;
+    grid-template-rows: var(--header-height) 1fr;
+  }
+
+  .panel.header-strip {
+    grid-area: 1 / 1 / 2 / 3;
+  }
+
+  .panel.main-panel {
+    grid-area: 2 / 1 / 3 / 2;
+  }
+
+  .panel.sidebar-panel {
+    grid-area: 2 / 2 / 3 / 3;
+  }
+}
+
+@media (min-aspect-ratio: 1/1) {
+  #app {
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: var(--header-height) 1fr;
+  }
+
+  .panel.header-strip {
+    grid-area: 1 / 1 / 2 / 4;
+  }
+
+  .panel.main-panel {
+    grid-area: 2 / 1 / 3 / 3;
+  }
+
+  .panel.sidebar-panel {
+    grid-area: 2 / 3 / 3 / 4;
+  }
 }
 
 .panel {
@@ -38,7 +85,7 @@ html, body {
 }
 
 .panel-header {
-  padding: 10px 14px;
+  padding: var(--spacing-sm) var(--spacing-md);
   font-weight: bold;
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
@@ -46,21 +93,34 @@ html, body {
 .panel-body {
   flex: 1;
   min-height: 0;
-  padding: 12px;
+  padding: var(--spacing-md);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--spacing-md);
 }
 
 .error {
-  color: #fecaca;
-  padding: 16px;
+  color: lightcoral;
+  padding: var(--spacing-lg);
+}
+
+.panel.main-panel .panel-body {
+  display: flex;
+  flex-direction: column;
+}
+
+@media (min-aspect-ratio: 1/1) {
+  .panel.main-panel .panel-body {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--gap);
+  }
 }
 
 #ip-footer {
   position: fixed;
-  bottom: 8px;
-  right: 12px;
+  bottom: var(--spacing-sm);
+  right: var(--spacing-md);
   font-size: 0.72rem;
   color: rgba(255, 255, 255, 0.25);
   font-family: monospace;

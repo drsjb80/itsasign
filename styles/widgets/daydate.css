@@ -4,7 +4,7 @@
   justify-content: center;
   align-items: center;
   text-align: center;
-  min-height: 224px;
+  min-height: 14rem;
 }
 
 .daydate-weekday {
@@ -14,7 +14,7 @@
 }
 
 .daydate-date {
-  margin-top: 10px;
+  margin-top: var(--spacing-md);
   color: var(--muted);
   font-size: 1.45rem;
   line-height: 1.1;

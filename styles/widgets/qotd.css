@@ -5,7 +5,7 @@
 }
 
 .qotd-attribution {
-  margin-top: 10px;
+  margin-top: var(--spacing-md);
   color: var(--muted);
   font-size: 2rem;
   text-align: right;

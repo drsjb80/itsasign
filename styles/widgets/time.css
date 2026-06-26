@@ -2,10 +2,10 @@
   font-size: 3rem;
   line-height: 1;
   font-weight: bold;
-  margin-top: 6px;
+  margin-top: var(--spacing-xs);
 }
 
 .time-date {
   color: var(--muted);
-  margin-top: 8px;
+  margin-top: var(--spacing-sm);
 }

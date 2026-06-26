@@ -1,7 +1,7 @@
 .playlist-stage {
   min-height: 0;
   flex: 1;
-  background: #000;
+  background: black;
   border-radius: 10px;
   overflow: hidden;
   position: relative;
@@ -13,7 +13,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  background: #000;
+  background: black;
 }
 
 .playlist-image {
@@ -21,7 +21,7 @@
   height: 100%;
   display: block;
   object-fit: cover;
-  background: #000;
+  background: black;
 }
 
 .rss-slide {
@@ -29,7 +29,7 @@
   background: #111827;
   color: var(--text);
   height: 100%;
-  padding: 16px;
+  padding: var(--spacing-lg);
 }
 
 .rss-main {
@@ -42,8 +42,8 @@
 .rss-header {
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
 }
 
 .rss-header-text {
@@ -65,10 +65,10 @@
 
 .rss-qr-wrap {
   background: white;
-  border-radius: 8px;
-  padding: 8px;
+  border-radius: var(--spacing-sm);
+  padding: var(--spacing-sm);
   flex-shrink: 0;
-  width: 80px;
+  width: 5rem;
 }
 
 .rss-qr-wrap img {
@@ -79,22 +79,22 @@
 .rss-qr-label {
   color: var(--muted);
   font-size: calc(0.8rem * var(--rss-font-scale, 1));
-  margin-top: 4px;
+  margin-top: var(--spacing-xs);
   text-align: center;
 }
 
 .rss-items {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--spacing-md);
   overflow: hidden;
 }
 
 .rss-item {
   display: grid;
   grid-template-columns: 8em 1fr;
-  gap: 0.75rem;
-  padding-bottom: 0.75rem;
+  gap: var(--spacing-md);
+  padding-bottom: var(--spacing-md);
   border-bottom: 1px solid rgba(255,255,255,0.08);
 }
 
