@@ -1,0 +1,9 @@
+.xkcd-title {
+  padding: var(--spacing-md);
+  background: #1a1a1a;
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: bold;
+  text-align: center;
+  line-height: 1.4;
+}

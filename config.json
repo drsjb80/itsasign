@@ -7,7 +7,8 @@
     "./widgets/weather.js",
     "./widgets/playlist.js",
     "./widgets/moon.js",
-    "./widgets/qotd.js"
+    "./widgets/qotd.js",
+    "./widgets/xkcd.js"
   ],
   "rss": {
     "proxy": "http://localhost:8080/",
@@ -91,10 +92,8 @@
               "url": "https://cacm.acm.org/category/software-engineering-and-programming-languages/feed/"
             },
             {
-              "type": "image",
-              "title": "XKCD",
-              "src": "http://localhost:8080/XKCD.png",
-              "durationMs": 10000
+              "type": "xkcd",
+              "title": "XKCD"
             },
             {
               "type": "rss-feed",
