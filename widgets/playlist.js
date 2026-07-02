@@ -265,19 +265,30 @@ function showRssPage(stage, data) {
 }
 
 async function fetchFeed(feedUrl, item = {}, config = {}) {
-  const proxy = item.proxy !== undefined ? item.proxy : (config.rss?.proxy || null);
-  const finalUrl = proxy ? proxy + feedUrl : feedUrl;
+  let xmlText;
 
-  const response = await fetch(finalUrl);
-  if (!response.ok) {
-    const fallback = await fetchFeedViaRss2Json(feedUrl);
-    if (fallback) {
-      return fallback;
+  try {
+    xmlText = await fetchFeedViaRssServer(feedUrl);
+  } catch (error) {
+    console.warn(`RSS server failed: ${error.message}, trying direct fetch...`);
+    try {
+      const proxy = item.proxy !== undefined ? item.proxy : (config.rss?.proxy || null);
+      const finalUrl = proxy ? proxy + feedUrl : feedUrl;
+      const response = await fetch(finalUrl);
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`);
+      }
+      xmlText = await response.text();
+    } catch (directError) {
+      console.warn(`Direct fetch failed: ${directError.message}, trying rss2json...`);
+      const fallback = await fetchFeedViaRss2Json(feedUrl);
+      if (fallback) {
+        return fallback;
+      }
+      throw new Error(`All feed fetch methods failed for ${feedUrl}`);
     }
-    throw new Error(`Feed fetch failed: ${finalUrl}`);
   }
 
-  const xmlText = await response.text();
   try {
     return parseRssXml(xmlText, feedUrl);
   } catch (error) {
@@ -287,6 +298,15 @@ async function fetchFeed(feedUrl, item = {}, config = {}) {
     }
     throw error;
   }
+}
+
+async function fetchFeedViaRssServer(feedUrl) {
+  const rssServerUrl = `http://localhost:3001/fetch-rss?url=${encodeURIComponent(feedUrl)}`;
+  const response = await fetch(rssServerUrl);
+  if (!response.ok) {
+    throw new Error(`RSS server returned ${response.status}`);
+  }
+  return response.text();
 }
 
 async function fetchFeedViaRss2Json(feedUrl) {
