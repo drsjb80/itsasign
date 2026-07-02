@@ -30,7 +30,7 @@ export function create(widget, config) {
   async function playNext() {
     const item = items[itemIndex];
     const left = `${itemIndex + 1} / ${items.length}`;
-    const right = item.type === 'rss-feed' ? 'RSS' : item.type === 'image' ? 'Image' : item.type;
+    const right = item.type === 'rss-feed' ? 'RSS' : item.type === 'image' ? 'Image' : item.type === 'xkcd' ? 'XKCD' : item.type;
     meta.innerHTML = `<span>${escapeHtml(left)}</span><span>${escapeHtml(right)}</span>`;
 
     if (item.type === 'image') {
@@ -45,6 +45,14 @@ export function create(widget, config) {
       await playRssFeed(stage, item, config);
       itemIndex = (itemIndex + 1) % items.length;
       setTimeout(playNext, 25);
+      return;
+    }
+
+    if (item.type === 'xkcd') {
+      await showXkcd(stage, item, config);
+      itemIndex = (itemIndex + 1) % items.length;
+      const duration = item.durationMs || 30000;
+      setTimeout(playNext, duration);
       return;
     }
 
@@ -157,6 +165,54 @@ async function playRssFeed(stage, item, config) {
         fontScale: resolveRssFontScale(item, config)
       });
     await wait(pageDurationMs);
+  }
+}
+
+async function showXkcd(stage, item, config = {}) {
+  stage.innerHTML = '';
+
+  const slide = document.createElement('div');
+  slide.className = 'playlist-slide';
+
+  const image = document.createElement('img');
+  image.className = 'playlist-image';
+  image.alt = 'Current XKCD comic';
+
+  const title = document.createElement('div');
+  title.className = 'xkcd-title';
+  title.textContent = 'Loading...';
+
+  slide.append(image, title);
+  stage.appendChild(slide);
+
+  try {
+    const xkcdUrl = 'https://xkcd.com/info.0.json';
+    const rssServerUrl = `http://localhost:3002/fetch-rss?url=${encodeURIComponent(xkcdUrl)}`;
+
+    const response = await fetch(rssServerUrl);
+    if (!response.ok) {
+      throw new Error(`Server returned ${response.status}`);
+    }
+
+    const text = await response.text();
+    const json = JSON.parse(text);
+    image.src = json.img;
+    title.textContent = json.title;
+    image.onerror = () => {
+      reportWidgetError({
+        widgetType: type,
+        message: 'Failed to load XKCD image',
+        target: stage,
+        asHtml: true
+      });
+    };
+  } catch (error) {
+    reportWidgetError({
+      widgetType: type,
+      message: `Failed to fetch XKCD: ${error.message}`,
+      target: stage,
+      asHtml: true
+    });
   }
 }
 
