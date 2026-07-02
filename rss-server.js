@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 const url = require('url');
 const querystring = require('querystring');
 
-const PORT = process.env.RSS_SERVER_PORT || 3001;
+const PORT = process.env.RSS_SERVER_PORT || 3002;
 const RSS_PROXY_PORT = process.env.RSS_PROXY_PORT || 8080;
 
 let browser = null;
@@ -32,7 +32,18 @@ async function getBrowser() {
 
 async function fetchRssWithPuppeteer(feedUrl, timeoutMs = 15000) {
   const b = await getBrowser();
-  const page = await b.createPage();
+  const page = await b.newPage();
+  let responseBody = null;
+
+  await page.on('response', async (response) => {
+    if (response.url() === feedUrl) {
+      try {
+        responseBody = await response.buffer();
+      } catch (e) {
+        // Response might not be bufferable, continue
+      }
+    }
+  });
 
   try {
     await page.setUserAgent(
@@ -40,6 +51,11 @@ async function fetchRssWithPuppeteer(feedUrl, timeoutMs = 15000) {
     );
 
     await page.goto(feedUrl, { waitUntil: 'networkidle2', timeout: timeoutMs });
+
+    if (responseBody) {
+      return responseBody.toString('utf-8');
+    }
+
     const content = await page.content();
     return content;
   } finally {
@@ -51,8 +67,11 @@ const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
 
+  console.log(`[${new Date().toISOString()}] ${req.method} ${pathname}`);
+
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', '*');
   res.setHeader('Content-Type', 'application/json');
 
   if (req.method === 'OPTIONS') {
@@ -71,18 +90,21 @@ const server = http.createServer(async (req, res) => {
     const feedUrl = parsedUrl.query.url;
 
     if (!feedUrl) {
+      console.error(`  Missing URL parameter. Query:`, parsedUrl.query);
       res.writeHead(400);
       res.end(JSON.stringify({ error: 'Missing url parameter' }));
       return;
     }
+    console.log(`  Fetching: ${feedUrl}`);
 
     try {
       const content = await fetchRssWithPuppeteer(feedUrl);
+      console.log(`  ✓ Success (${content.length} bytes)`);
       res.writeHead(200, { 'Content-Type': 'text/xml' });
       res.end(content);
     } catch (error) {
-      console.error(`Error fetching ${feedUrl}:`, error.message);
-      res.writeHead(500);
+      console.error(`  ✗ Error: ${error.message}`);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: error.message }));
     }
     return;

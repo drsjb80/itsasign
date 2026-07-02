@@ -270,7 +270,7 @@ async function fetchFeed(feedUrl, item = {}, config = {}) {
   try {
     xmlText = await fetchFeedViaRssServer(feedUrl);
   } catch (error) {
-    console.warn(`RSS server failed: ${error.message}, trying direct fetch...`);
+    console.warn(`[RSS] Server failed: ${error.message}, trying direct fetch...`);
     try {
       const proxy = item.proxy !== undefined ? item.proxy : (config.rss?.proxy || null);
       const finalUrl = proxy ? proxy + feedUrl : feedUrl;
@@ -279,8 +279,9 @@ async function fetchFeed(feedUrl, item = {}, config = {}) {
         throw new Error(`HTTP ${response.status}`);
       }
       xmlText = await response.text();
+      console.log(`[RSS] Got direct response: ${xmlText.length} bytes`);
     } catch (directError) {
-      console.warn(`Direct fetch failed: ${directError.message}, trying rss2json...`);
+      console.warn(`[RSS] Direct fetch failed: ${directError.message}, trying rss2json...`);
       const fallback = await fetchFeedViaRss2Json(feedUrl);
       if (fallback) {
         return fallback;
@@ -290,8 +291,11 @@ async function fetchFeed(feedUrl, item = {}, config = {}) {
   }
 
   try {
-    return parseRssXml(xmlText, feedUrl);
+    const result = parseRssXml(xmlText, feedUrl);
+    console.log(`[RSS] Parsed ${result.items?.length || 0} items`);
+    return result;
   } catch (error) {
+    console.error(`[RSS] Parse error: ${error.message}`);
     const fallback = await fetchFeedViaRss2Json(feedUrl);
     if (fallback) {
       return fallback;
@@ -301,12 +305,17 @@ async function fetchFeed(feedUrl, item = {}, config = {}) {
 }
 
 async function fetchFeedViaRssServer(feedUrl) {
-  const rssServerUrl = `http://localhost:3001/fetch-rss?url=${encodeURIComponent(feedUrl)}`;
+  const rssServerUrl = `http://localhost:3002/fetch-rss?url=${encodeURIComponent(feedUrl)}`;
+  console.log(`[RSS] Fetching from server: ${feedUrl}`);
   const response = await fetch(rssServerUrl);
   if (!response.ok) {
-    throw new Error(`RSS server returned ${response.status}`);
+    const text = await response.text();
+    console.error(`[RSS] Server error ${response.status}:`, text);
+    throw new Error(`RSS server returned ${response.status}: ${text}`);
   }
-  return response.text();
+  const text = await response.text();
+  console.log(`[RSS] Got ${text.length} bytes from server`);
+  return text;
 }
 
 async function fetchFeedViaRss2Json(feedUrl) {
