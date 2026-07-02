@@ -11,8 +11,12 @@ ItsaSign is an extensible digital signage application that renders configurable 
 - Includes built-in widgets for:
   - Clock
   - Weather
+  - Moon phase
   - Playlist (images + RSS feed pages)
-- Supports RSS feed proxying via `cors-anywhere.js`
+  - Quote of the Day
+  - XKCD (current comic with title)
+- Fetches RSS feeds via Puppeteer to bypass bot detection (Cloudflare, etc.)
+- Caches RSS feeds and other data for 24 hours
 
 ## Requirements
 
@@ -24,6 +28,18 @@ ItsaSign is an extensible digital signage application that renders configurable 
     npm install
 
 ## Run
+
+**Development** (two terminals):
+
+    # Terminal 1: RSS server (port 3002)
+    npm run dev
+
+    # Terminal 2: Web server (port 8080)
+    npm run serve
+
+Then open `http://localhost:8080` in your browser.
+
+**Kiosk mode** (full screen on startup):
 
 Copy `kiosk.sh` to `~/scripts/`
 
@@ -38,7 +54,6 @@ Primary configuration lives in `config.json`:
 - `plugins`: module paths for widget plugins
 - `layout`: CSS grid columns/rows
 - `panels`: panel definitions and per-panel `widgets`
-- `rss.proxy`: optional default proxy URL for RSS feeds
 - `rss.fontScale`: optional global RSS text scale factor (default `1`)
 - `rss.showQR`: optional global RSS QR toggle (default `true`)
 - `rss.showThumbnails`: optional global RSS thumbnail toggle (default `true`)
@@ -73,7 +88,6 @@ Example:
 
     {
       "rss": {
-        "proxy": "http://localhost:8080/",
         "fontScale": 2
       },
       "panels": [
@@ -174,6 +188,37 @@ The weather widget uses Open-Meteo and now supports current conditions and a dai
 - `windSpeedUnit`: `mph`, `kmh`, `ms`, or `kn`.
 - `refreshMs`: refresh interval in milliseconds.
 
+## RSS Feed Server
+
+The app includes a Puppeteer-based RSS server (`rss-server.js`) that:
+
+- Fetches RSS feeds via a real browser, bypassing bot detection (Cloudflare, etc.)
+- Caches responses for 24 hours (configurable via `CACHE_TTL_MS`)
+- Serves feeds to the web client on port 3002
+
+**How it works:**
+1. Client requests feed from `http://localhost:3002/fetch-rss?url=<feed-url>`
+2. Server checks cache; if hit, returns instantly
+3. If cache miss, Puppeteer fetches the feed via Chrome, captures the raw HTTP response
+4. Result is cached and returned to client
+5. Client falls back to direct fetch and rss2json service if server is unavailable
+
+## XKCD Widget
+
+The XKCD widget fetches the current comic from the XKCD API and displays it with the comic title.
+
+- Refreshes daily by default (configurable via `refreshMs`)
+- No external dependencies or cron jobs needed
+- Configuration in `config.json`:
+
+```json
+{
+  "type": "xkcd",
+  "title": "XKCD",
+  "refreshMs": 86400000
+}
+```
+
 ## Extending With New Widgets
 
 Add new widget modules under `widgets/`, then register them in `config.json` under `plugins`.
@@ -183,7 +228,7 @@ For full step-by-step instructions and templates, see `WIDGET.md`.
 ## Notes
 
 - The app is intentionally config-driven to support signage changes without editing app logic.
-- RSS feeds can use a global proxy (`rss.proxy`) or per-feed `proxy` values.
+- All RSS feeds are fetched server-side via Puppeteer to bypass bot detection and other restrictions.
 
 ## Troubleshooting
 
@@ -202,10 +247,12 @@ For full step-by-step instructions and templates, see `WIDGET.md`.
 
 ### 2. RSS feeds do not load
 
-- Verify `rss.proxy` in `config.json` points to your local proxy (for example `http://localhost:8080/`).
-- For individual feed overrides, verify per-feed `proxy` values under playlist RSS items.
+- Ensure the RSS server is running: `npm run dev` (port 3002)
+- Verify the web server is running: `npm run serve` (port 8080)
 - Confirm the RSS source URL itself is valid and publicly reachable.
-- If a feed still fails, test with another known RSS URL to isolate source issues.
+- Check browser console (`F12` → Console tab) for fetch errors.
+- RSS feeds are cached for 24 hours; to force a refresh, restart the RSS server.
+- If a feed still fails, test it directly: `curl "http://localhost:3002/fetch-rss?url=<feed-url>"`
 
 ### 3. `Unknown widget type` appears
 

@@ -29,17 +29,17 @@ lxterminal &
 # --- Kill existing node processes ---
 pkill node || true
 
-# --- Start local server ---
-npx serve >> /tmp/npx_serve 2>&1 &
+# --- Start RSS server ---
+npm run dev >> /tmp/rss-server.log 2>&1 &
 
-# --- Start CORS proxy ---
-node cors-anywhere >> /tmp/cors-anywhere 2>&1 &
+# --- Start web server ---
+npm run serve >> /tmp/web-server.log 2>&1 &
 
-# --- Wait for server ---
+# --- Wait for web server ---
 COUNT=0
 MAX_RETRIES=30
 
-until curl -s http://localhost:3000 >/dev/null; do
+until curl -s http://localhost:8080 >/dev/null; do
     sleep 1
     COUNT=$((COUNT + 1))
 
@@ -55,4 +55,4 @@ done
   --enable-features=UseOzonePlatform \
   --kiosk \
   --password-store=basic \
-  http://localhost:3000 &
+  http://localhost:8080 &
