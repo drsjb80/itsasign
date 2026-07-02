@@ -8,6 +8,22 @@ const RSS_PROXY_PORT = process.env.RSS_PROXY_PORT || 8080;
 
 let browser = null;
 let browserStarting = false;
+const cache = new Map();
+const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+
+function getCachedContent(url) {
+  const cached = cache.get(url);
+  if (!cached) return null;
+  if (Date.now() - cached.timestamp > CACHE_TTL_MS) {
+    cache.delete(url);
+    return null;
+  }
+  return cached.content;
+}
+
+function setCacheContent(url, content) {
+  cache.set(url, { content, timestamp: Date.now() });
+}
 
 async function getBrowser() {
   if (browser) return browser;
@@ -95,10 +111,20 @@ const server = http.createServer(async (req, res) => {
       res.end(JSON.stringify({ error: 'Missing url parameter' }));
       return;
     }
+
+    const cached = getCachedContent(feedUrl);
+    if (cached) {
+      console.log(`  ✓ Cached (${cached.length} bytes)`);
+      res.writeHead(200, { 'Content-Type': 'text/xml' });
+      res.end(cached);
+      return;
+    }
+
     console.log(`  Fetching: ${feedUrl}`);
 
     try {
       const content = await fetchRssWithPuppeteer(feedUrl);
+      setCacheContent(feedUrl, content);
       console.log(`  ✓ Success (${content.length} bytes)`);
       res.writeHead(200, { 'Content-Type': 'text/xml' });
       res.end(content);

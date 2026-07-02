@@ -11,7 +11,7 @@
   ],
   "rss": {
     "proxy": "http://localhost:8080/",
-    "itemDurationMs": 2200,
+    "itemDurationMs": 3000,
     "fontScale": 2,
     "showQR": true,
     "showThumbnails": true,
@@ -56,7 +56,7 @@
               "type": "image",
               "title": "Toby",
               "src": "http://sites.msudenver.edu/beatys/wp-content/uploads/sites/461/2026/04/Toby-scaled.png",
-              "durationMs": 8000
+              "durationMs": 10000
             },
             {
               "type": "rss-feed",
@@ -83,7 +83,7 @@
               "type": "image",
               "title": "NOAA",
               "src": "https://www.wpc.ncep.noaa.gov/noaa/noaa.gif",
-              "durationMs": 8000
+              "durationMs": 10000
             },
             {
               "type": "rss-feed",
@@ -93,8 +93,8 @@
             {
               "type": "image",
               "title": "XKCD",
-              "src": "http://localhost:3000/XKCD.png",
-              "durationMs": 8000
+              "src": "http://localhost:8080/XKCD.png",
+              "durationMs": 10000
             },
             {
               "type": "rss-feed",
