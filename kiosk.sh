@@ -26,11 +26,19 @@ fi
 # also: Alt-F4
 lxterminal &
 
-# --- Kill existing node processes ---
+# --- Stop existing Docker container and node processes ---
+docker stop itsasign-rss || true
+docker rm itsasign-rss || true
 pkill node || true
 
-# --- Start RSS server ---
-npm run dev >> /tmp/rss-server.log 2>&1 &
+# --- Build Docker image if needed ---
+if ! docker image inspect itsasign-rss:latest >/dev/null 2>&1; then
+    echo "Building Docker image..."
+    docker build -t itsasign-rss:latest . >> /tmp/docker-build.log 2>&1
+fi
+
+# --- Start RSS server in Docker ---
+docker run -d -p 3000:3000 --name itsasign-rss itsasign-rss:latest >> /tmp/rss-server.log 2>&1
 
 # --- Start web server ---
 npm run serve >> /tmp/web-server.log 2>&1 &

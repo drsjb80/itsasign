@@ -20,8 +20,9 @@ ItsaSign is an extensible digital signage application that renders configurable 
 
 ## Requirements
 
-- Node.js
+- Node.js (v20+)
 - npm
+- Docker (for RSS feed server with Puppeteer)
 
 ## Install
 
@@ -31,13 +32,19 @@ ItsaSign is an extensible digital signage application that renders configurable 
 
 **Development** (two terminals):
 
-    # Terminal 1: RSS server (port 3002)
-    npm run dev
+    # Terminal 1: Build and run RSS server in Docker (port 3000)
+    docker build -t itsasign-rss:latest .
+    docker run -d -p 3000:3000 --name itsasign-rss itsasign-rss:latest
 
     # Terminal 2: Web server (port 8080)
     npm run serve
 
 Then open `http://localhost:8080` in your browser.
+
+**Docker Notes:**
+- The RSS server runs in Docker with Node 22 and Chromium, regardless of your host system's Node version
+- The web server runs locally on port 8080 and serves files from your project directory
+- RSS server communicates with the web server over `localhost:3000`
 
 **Kiosk mode** (full screen on startup):
 
@@ -194,10 +201,11 @@ The app includes a Puppeteer-based RSS server (`rss-server.js`) that:
 
 - Fetches RSS feeds via a real browser, bypassing bot detection (Cloudflare, etc.)
 - Caches responses for 24 hours (configurable via `CACHE_TTL_MS`)
-- Serves feeds to the web client on port 3002
+- Runs in Docker with Node 22 and Chromium
+- Serves feeds to the web client on port 3000
 
 **How it works:**
-1. Client requests feed from `http://localhost:3002/fetch-rss?url=<feed-url>`
+1. Client requests feed from `http://localhost:3000/fetch-rss?url=<feed-url>`
 2. Server checks cache; if hit, returns instantly
 3. If cache miss, Puppeteer fetches the feed via Chrome, captures the raw HTTP response
 4. Result is cached and returned to client
@@ -247,12 +255,14 @@ For full step-by-step instructions and templates, see `WIDGET.md`.
 
 ### 2. RSS feeds do not load
 
-- Ensure the RSS server is running: `npm run dev` (port 3002)
+- Ensure the RSS server Docker container is running: `docker ps | grep itsasign-rss`
+- If not running, start it: `docker run -d -p 3000:3000 --name itsasign-rss itsasign-rss:latest`
 - Verify the web server is running: `npm run serve` (port 8080)
 - Confirm the RSS source URL itself is valid and publicly reachable.
 - Check browser console (`F12` → Console tab) for fetch errors.
-- RSS feeds are cached for 24 hours; to force a refresh, restart the RSS server.
-- If a feed still fails, test it directly: `curl "http://localhost:3002/fetch-rss?url=<feed-url>"`
+- Check container logs: `docker logs itsasign-rss`
+- RSS feeds are cached for 24 hours; to force a refresh, restart the container: `docker restart itsasign-rss`
+- If a feed still fails, test it directly: `curl "http://localhost:3000/fetch-rss?url=<feed-url>"`
 
 ### 3. `Unknown widget type` appears
 
