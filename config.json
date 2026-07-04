@@ -47,18 +47,13 @@
       "widgets": [
         {
           "type": "playlist",
-          "title": "Content Loop",
+          "title": "Content",
           "items": [
             {
               "type": "image",
               "title": "Toby",
               "src": "http://sites.msudenver.edu/beatys/wp-content/uploads/sites/461/2026/04/Toby-scaled.png",
               "durationMs": 10000
-            },
-            {
-              "type": "rss-feed",
-              "title": "BBC News",
-              "url": "https://feeds.bbci.co.uk/news/rss.xml"
             },
             {
               "type": "rss-feed",
@@ -69,13 +64,7 @@
               "type": "rss-feed",
               "title": "Computing and Society",
               "url": "https://cacm.acm.org/category/society/feed/"
-            }
-          ]
-        },
-        {
-          "type": "playlist",
-          "title": "Content Loop 2",
-          "items": [
+            },
             {
               "type": "image",
               "title": "NOAA",
