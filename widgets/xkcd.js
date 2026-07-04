@@ -27,7 +27,7 @@ export function create(widget) {
       image.onerror = () => {
         reportWidgetError({
           widgetType: type,
-          message: `Failed to load XKCD image`,
+          message: 'Failed to load XKCD image',
           target: el,
           asHtml: true
         });

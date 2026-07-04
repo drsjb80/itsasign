@@ -20,11 +20,11 @@ export function create(widget) {
 }
 
 function startClock(canvas) {
-  const ctx = canvas.getContext("2d");
-  const staticCanvas = document.createElement("canvas");
+  const ctx = canvas.getContext('2d');
+  const staticCanvas = document.createElement('canvas');
   staticCanvas.width = canvas.width;
   staticCanvas.height = canvas.height;
-  const staticCtx = staticCanvas.getContext("2d");
+  const staticCtx = staticCanvas.getContext('2d');
 
   let radius = canvas.height / 2;
   ctx.translate(radius, radius);
@@ -69,11 +69,11 @@ function startClock(canvas) {
   }
 
   function drawNumbers(ctx, radius) {
-    ctx.font = radius * 0.15 + "px arial";
-    ctx.textBaseline = "middle";
-    ctx.textAlign = "center";
+    ctx.font = radius * 0.15 + 'px arial';
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
     for (let num = 1; num < 13; num++) {
-      let ang = num * Math.PI / 6;
+      const ang = num * Math.PI / 6;
       ctx.rotate(ang);
       ctx.translate(0, -radius * 0.85);
       ctx.rotate(-ang);
@@ -94,7 +94,7 @@ function startClock(canvas) {
       ctx.rotate(ang);
       ctx.beginPath();
       ctx.lineWidth = mark % 5 === 0 ? radius * 0.02 : radius * 0.01;
-      ctx.strokeStyle = mark % 5 === 0 ? "#2a2a2a" : "#666";
+      ctx.strokeStyle = mark % 5 === 0 ? '#2a2a2a' : '#666';
       ctx.moveTo(0, -outer);
       ctx.lineTo(0, -inner);
       ctx.stroke();
@@ -115,22 +115,22 @@ function startClock(canvas) {
 
     hour = hour % 12;
     hour = (hour * Math.PI / 6) + (minute * Math.PI / (6 * 60)) + (second * Math.PI / (360 * 60));
-    drawHand(ctx, hour, hourLength, radius * 0.07, "#222");
+    drawHand(ctx, hour, hourLength, radius * 0.07, '#222');
 
     minute = (minute * Math.PI / 30) + (second * Math.PI / (30 * 60));
-    drawHand(ctx, minute, minuteLength, radius * 0.07, "#222");
+    drawHand(ctx, minute, minuteLength, radius * 0.07, '#222');
 
     second = (second * Math.PI / 30);
-    drawHand(ctx, second, secondLength, radius * 0.02, "#d62828");
+    drawHand(ctx, second, secondLength, radius * 0.02, '#d62828');
   }
 
   function drawHand(ctx, pos, length, width, color) {
     ctx.save();
     ctx.beginPath();
     ctx.lineWidth = width;
-    ctx.lineCap = "round";
+    ctx.lineCap = 'round';
     ctx.strokeStyle = color;
-    ctx.shadowColor = "rgba(0, 0, 0, 0.3)";
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
     ctx.shadowBlur = radius * 0.04;
     ctx.shadowOffsetX = radius * 0.01;
     ctx.shadowOffsetY = radius * 0.01;
