@@ -2,11 +2,18 @@
   background: var(--panel-2);
   border-radius: 0.625rem;
   padding: var(--spacing-md);
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .widget-title {
   font-weight: bold;
   margin-bottom: var(--spacing-sm);
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 
 .meta-row {
