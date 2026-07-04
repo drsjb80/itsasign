@@ -2,6 +2,8 @@
 
 # ItsaSign
 
+[![CI](https://github.com/drsjb80/itsasign/actions/workflows/ci.yml/badge.svg)](https://github.com/drsjb80/itsasign/actions/workflows/ci.yml)
+
 ItsaSign is an extensible digital signage application that renders configurable panels and widget plugins in the browser.
 
 ## What It Does
@@ -27,6 +29,17 @@ ItsaSign is an extensible digital signage application that renders configurable 
 ## Install
 
     npm install
+
+## Development
+
+**Lint code:**
+
+    npm run lint
+    npm run lint:fix  # Auto-fix issues
+
+**Security audit:**
+
+    npm audit
 
 ## Run
 
