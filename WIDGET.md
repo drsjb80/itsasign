@@ -2,7 +2,7 @@
 
 The optional full-width header strip is configured via `headerEnabled` in `config.json`.
 
-The header height is fixed at whatever value is set in `layout.rows` (e.g. `"160px 1fr"`). The image is displayed with `fit: contain`, so the **entire image is shown without cropping**. This header override does not use the global `images.fit` default.
+The header height is fixed at `10rem`. The image is displayed with `fit: contain`, so the **entire image is shown without cropping**. This header override does not use the global `images.fit` default.
 
 ### Recommended image dimensions
 
@@ -120,6 +120,7 @@ After saving files and reloading the page:
 - `createCard(title)`
 - `wait(ms)`
 - `escapeHtml(text)`
+- `reportWidgetError(options)`
 
 Import only what you need.
 
@@ -249,112 +250,164 @@ App-side usage note:
 
 - If you later implement widget replacement/re-rendering, call `plugin.destroy(oldElement)` before removing it from the DOM.
 
-## RSS Font Scale Options (Playlist Widget)
+---
 
-The playlist RSS slide supports a text scale factor while keeping original default sizes.
+# Playlist Widget and Item Types
 
-- Global: `rss.fontScale` (default `1`)
-- Per RSS item: `fontScale`
+The playlist widget is a carousel orchestrator that cycles through items of different types. Each item type is handled by a dedicated item widget.
 
-Precedence: per-item, then global.
+## Adding a new playlist item type
 
-Example:
+1. Create a new item widget module in `widgets/items/<type>-item.js`
+2. Export an async `playItem(stage, item, config)` function that:
+   - Renders content to the `stage` DOM element
+   - Waits for its display duration
+   - Returns when done (the promise resolves when the item should advance)
+3. Register the item widget in `widgets/playlist.js` in the `ITEM_PLAYERS` map
+
+Example: Custom item type
+
+```js
+// widgets/items/custom-item.js
+import { wait, reportWidgetError } from '../utils.js';
+
+const WIDGET_TYPE = 'playlist.custom-item';
+
+export async function playItem(stage, item = {}, config = {}) {
+  stage.innerHTML = '';
+  
+  const slide = document.createElement('div');
+  slide.className = 'playlist-slide';
+  
+  const content = document.createElement('div');
+  content.textContent = item.text || 'Custom content';
+  slide.appendChild(content);
+  
+  stage.appendChild(slide);
+  
+  const duration = item.durationMs || 5000;
+  await wait(duration);
+}
+```
+
+Then register it in `widgets/playlist.js`:
+
+```js
+import * as customItem from './items/custom-item.js';
+
+const ITEM_PLAYERS = {
+  'image': imageItem,
+  'rss-feed': rssFeedItem,
+  'custom': customItem  // Add here
+};
+```
+
+And use it in config:
 
 ```json
 {
-  "rss": {
-    "fontScale": 1.25
-  },
-  "panels": [
+  "type": "playlist",
+  "items": [
     {
-      "widgets": [
-        {
-          "type": "playlist",
-          "items": [
-            {
-              "type": "rss-feed",
-              "title": "ACM AI",
-              "url": "https://cacm.acm.org/category/artificial-intelligence-machine-learning/feed/",
-              "fontScale": 2
-            }
-          ]
-        }
-      ]
+      "type": "custom",
+      "text": "Hello",
+      "durationMs": 3000
     }
   ]
 }
 ```
 
-## RSS Thumbnail Options (Playlist Widget)
+## Built-in item types
 
-RSS feed items can show thumbnails when available.
-When an item has no image, a TV static fallback is rendered.
+### Image items
 
-- Global: `rss.showThumbnails` (default `true`)
-- Per RSS item: `showThumbnails`
+Display an image for a configured duration.
 
-Precedence: per-item, then global.
+Configuration:
+- `src`: image URL (required)
+- `title`: display title (optional)
+- `durationMs`: how long to show (default from `config.images.durationMs`, fallback `10000`)
+- `fit`: CSS object-fit value (default from `config.images.fit`, fallback `cover`)
 
 Example:
 
 ```json
 {
-  "rss": {
-    "showThumbnails": true
-  },
-  "panels": [
-    {
-      "widgets": [
-        {
-          "type": "playlist",
-          "items": [
-            {
-              "type": "rss-feed",
-              "title": "ACM AI",
-              "url": "https://cacm.acm.org/category/artificial-intelligence-machine-learning/feed/",
-              "showThumbnails": true
-            }
-          ]
-        }
-      ]
-    }
-  ]
+  "type": "image",
+  "title": "Campus Photo",
+  "src": "images/campus.jpg",
+  "durationMs": 8000,
+  "fit": "contain"
 }
 ```
 
-## RSS Pagination And Limits (Playlist Widget)
+Global defaults:
 
-You can define global defaults in `rss` config for item paging and limits.
+```json
+{
+  "images": {
+    "durationMs": 10000,
+    "fit": "cover"
+  }
+}
+```
 
-- Global: `rss.itemsPerPage` (default `3`)
-- Global: `rss.maxItems` (default `12`)
-- Per RSS item overrides: `itemsPerPage`, `maxItems`
+### RSS feed items
 
-Precedence: per-item, then global.
+Fetch and display paginated RSS feeds using the Puppeteer server.
 
-## RSS QR Options (Playlist Widget)
+Configuration:
+- `url`: feed URL (required)
+- `title`: display title (default: feed title)
+- `itemsPerPage`: items per slide (default from `config.rss.itemsPerPage`)
+- `itemDurationMs`: milliseconds per slide (default from `config.rss.itemDurationMs`)
+- `maxItems`: cap total items (default from `config.rss.maxItems`)
+- `showQR`: show QR code linking to feed (default from `config.rss.showQR`)
+- `showThumbnails`: show item thumbnails (default from `config.rss.showThumbnails`)
+- `fontScale`: scale RSS text (default from `config.rss.fontScale`)
+- `proxy`: override the fetch proxy URL (default from `config.rss.proxy`)
 
-RSS feed slides can display a QR code that points at the feed URL.
+Example:
 
-- Global: `rss.showQR` (default `true`)
-- Per RSS item: `showQR`
+```json
+{
+  "type": "rss-feed",
+  "title": "Campus News",
+  "url": "https://example.com/feed.xml",
+  "itemsPerPage": 2,
+  "itemDurationMs": 3000,
+  "showQR": true,
+  "fontScale": 1.2
+}
+```
 
-Precedence: per-item, then global.
+Global defaults (apply to all RSS items unless overridden):
 
-## Image Defaults (Playlist Widget)
+```json
+{
+  "rss": {
+    "proxy": "http://localhost:8080/",
+    "itemDurationMs": 3000,
+    "fontScale": 1,
+    "showQR": true,
+    "showThumbnails": true,
+    "itemsPerPage": 3,
+    "maxItems": 12
+  }
+}
+```
 
-Image playlist items can use global defaults for slide duration and fit.
-
-- Global: `images.durationMs` (default `10000`)
-- Global: `images.fit` (default `cover`)
-- Per image: `durationMs`, `fit`
-
-Precedence: per-item, then global.
-
-## Current Widget Modules
+## Current widget modules
 
 Existing widget plugins in this project:
 - `widgets/clock.js`
+- `widgets/daydate.js`
 - `widgets/weather.js`
-- `widgets/playlist.js`
-- `widgets/time.js` (currently not listed in `plugins`)
+- `widgets/playlist.js` (carousel orchestrator)
+- `widgets/moon.js`
+- `widgets/qotd.js`
+- `widgets/xkcd.js`
+
+Item widgets (used within playlist):
+- `widgets/items/image-item.js`
+- `widgets/items/rss-feed-item.js`
