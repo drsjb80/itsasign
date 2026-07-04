@@ -88,10 +88,6 @@
               "url": "https://cacm.acm.org/category/software-engineering-and-programming-languages/feed/"
             },
             {
-              "type": "xkcd",
-              "title": "XKCD"
-            },
-            {
               "type": "rss-feed",
               "title": "Security and Privacy",
               "url": "https://cacm.acm.org/category/security-and-privacy/feed/"
