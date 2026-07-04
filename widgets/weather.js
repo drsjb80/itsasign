@@ -114,7 +114,7 @@ export function create(widget) {
       const temperatureNow = toFiniteNumber(current.temperature_2m);
       const windSpeedNow = toFiniteNumber(current.wind_speed_10m);
       trend.textContent = formatTrend(previousTemperature, temperatureNow);
-      if (temperatureNow != null) {
+      if (temperatureNow !== null) {
         previousTemperature = temperatureNow;
       }
 
@@ -130,7 +130,7 @@ export function create(widget) {
         temperatureUnit,
         windSpeedUnit
       });
-      windChill.querySelector('.weather-stat-value').textContent = windChillValue == null ? 'N/A' : formatTemperature(windChillValue);
+      windChill.querySelector('.weather-stat-value').textContent = windChillValue === null ? 'N/A' : formatTemperature(windChillValue);
 
       renderForecast({
         forecastList,
@@ -208,7 +208,7 @@ async function resolveCoordinates({ useGeolocation, geolocationTimeoutMs, config
     }
   }
 
-  if (configuredLat != null && configuredLon != null) {
+  if (configuredLat !== null && configuredLon !== null) {
     return {
       latitude: Number(configuredLat),
       longitude: Number(configuredLon),
@@ -299,7 +299,7 @@ function toFiniteNumber(value) {
 }
 
 function formatTrend(previousTemperature, currentTemperature) {
-  if (previousTemperature == null || currentTemperature == null) {
+  if (previousTemperature === null || currentTemperature === null) {
     return 'Trend: --';
   }
 
@@ -326,7 +326,7 @@ function formatSignedDecimal(value, decimals) {
 }
 
 function calculateWindChill({ temperature, windSpeed, temperatureUnit, windSpeedUnit }) {
-  if (temperature == null || windSpeed == null) {
+  if (temperature === null || windSpeed === null) {
     return null;
   }
 
@@ -433,7 +433,7 @@ function dayLabel(dateText, index) {
 }
 
 function degreesToCompass(deg) {
-  if (deg == null || Number.isNaN(Number(deg))) {
+  if (deg === null || Number.isNaN(Number(deg))) {
     return '';
   }
 

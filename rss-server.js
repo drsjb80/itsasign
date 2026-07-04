@@ -1,7 +1,6 @@
 const http = require('http');
 const puppeteer = require('puppeteer');
 const url = require('url');
-const querystring = require('querystring');
 
 const PORT = process.env.RSS_SERVER_PORT || 3002;
 const RSS_PROXY_PORT = process.env.RSS_PROXY_PORT || 8080;
@@ -106,7 +105,7 @@ const server = http.createServer(async (req, res) => {
     const feedUrl = parsedUrl.query.url;
 
     if (!feedUrl) {
-      console.error(`  Missing URL parameter. Query:`, parsedUrl.query);
+      console.error('  Missing URL parameter. Query:', parsedUrl.query);
       res.writeHead(400);
       res.end(JSON.stringify({ error: 'Missing url parameter' }));
       return;
