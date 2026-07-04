@@ -33,12 +33,12 @@ html, body {
   display: grid;
   gap: var(--gap);
   padding: var(--gap);
-  grid-template-columns: 1fr;
-  grid-template-rows: var(--header-height) 1fr 1fr;
+  grid-template-columns: 2fr 1fr;
+  grid-template-rows: var(--header-height) 1fr;
 }
 
 .panel.header-strip {
-  grid-area: 1 / 1 / 2 / 2;
+  grid-area: 1 / 1 / 2 / 3;
 }
 
 .panel.main-panel {
@@ -46,7 +46,7 @@ html, body {
 }
 
 .panel.sidebar-panel {
-  grid-area: 3 / 1 / 4 / 2;
+  grid-area: 2 / 2 / 3 / 3;
 }
 
 .panel {

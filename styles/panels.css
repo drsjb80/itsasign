@@ -1,6 +1,7 @@
 .panel.sidebar-panel .panel-body {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: 1fr;
+  align-content: start;
 }
 
 .panel.header-strip {
