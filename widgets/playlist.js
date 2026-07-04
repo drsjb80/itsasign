@@ -187,7 +187,7 @@ async function showXkcd(stage, item, config = {}) {
 
   try {
     const xkcdUrl = 'https://xkcd.com/info.0.json';
-    const rssServerUrl = `http://localhost:3002/fetch-rss?url=${encodeURIComponent(xkcdUrl)}`;
+    const rssServerUrl = `http://localhost:3000/fetch-rss?url=${encodeURIComponent(xkcdUrl)}`;
 
     const response = await fetch(rssServerUrl);
     if (!response.ok) {
@@ -337,31 +337,17 @@ async function fetchFeed(feedUrl, item = {}, config = {}) {
       xmlText = await response.text();
       console.log(`[RSS] Got direct response: ${xmlText.length} bytes`);
     } catch (directError) {
-      console.warn(`[RSS] Direct fetch failed: ${directError.message}, trying rss2json...`);
-      const fallback = await fetchFeedViaRss2Json(feedUrl);
-      if (fallback) {
-        return fallback;
-      }
-      throw new Error(`All feed fetch methods failed for ${feedUrl}`);
+      throw new Error(`Direct feed fetch failed: ${directError.message}`);
     }
   }
 
-  try {
-    const result = parseRssXml(xmlText, feedUrl);
-    console.log(`[RSS] Parsed ${result.items?.length || 0} items`);
-    return result;
-  } catch (error) {
-    console.error(`[RSS] Parse error: ${error.message}`);
-    const fallback = await fetchFeedViaRss2Json(feedUrl);
-    if (fallback) {
-      return fallback;
-    }
-    throw error;
-  }
+  const result = parseRssXml(xmlText, feedUrl);
+  console.log(`[RSS] Parsed ${result.items?.length || 0} items`);
+  return result;
 }
 
 async function fetchFeedViaRssServer(feedUrl) {
-  const rssServerUrl = `http://localhost:3002/fetch-rss?url=${encodeURIComponent(feedUrl)}`;
+  const rssServerUrl = `http://localhost:3000/fetch-rss?url=${encodeURIComponent(feedUrl)}`;
   console.log(`[RSS] Fetching from server: ${feedUrl}`);
   const response = await fetch(rssServerUrl);
   if (!response.ok) {
@@ -374,39 +360,6 @@ async function fetchFeedViaRssServer(feedUrl) {
   return text;
 }
 
-async function fetchFeedViaRss2Json(feedUrl) {
-  const fallbackUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(feedUrl)}`;
-
-  try {
-    const response = await fetch(fallbackUrl);
-    if (!response.ok) {
-      return null;
-    }
-
-    const data = await response.json();
-    if (data?.status !== 'ok' || !Array.isArray(data.items)) {
-      return null;
-    }
-
-    return {
-      source: 'rss2json',
-      feed: {
-        title: data.feed?.title || 'RSS Feed',
-        link: data.feed?.link || feedUrl,
-        description: data.feed?.description || ''
-      },
-      items: data.items.map(item => ({
-        title: item?.title || '(untitled)',
-        link: item?.link || '',
-        pubDate: item?.pubDate || '',
-        contentSnippet: item?.description || item?.content || '',
-        thumbnailUrl: extractThumbnailFromRss2JsonItem(item)
-      }))
-    };
-  } catch {
-    return null;
-  }
-}
 
 function parseRssXml(xmlText, fallbackUrl = '') {
   const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
@@ -500,31 +453,6 @@ function createRssStaticFallback() {
   return staticEl;
 }
 
-function extractThumbnailFromRss2JsonItem(item = {}) {
-  if (typeof item?.thumbnail === 'string' && item.thumbnail.trim()) {
-    return item.thumbnail.trim();
-  }
-
-  if (typeof item?.enclosure?.link === 'string' && item.enclosure.link.trim()) {
-    return item.enclosure.link.trim();
-  }
-
-  if (typeof item?.description === 'string') {
-    const fromDescription = extractFirstImageFromHtml(item.description);
-    if (fromDescription) {
-      return fromDescription;
-    }
-  }
-
-  if (typeof item?.content === 'string') {
-    const fromContent = extractFirstImageFromHtml(item.content);
-    if (fromContent) {
-      return fromContent;
-    }
-  }
-
-  return '';
-}
 
 function extractThumbnailFromXmlItem(itemEl) {
   const mediaThumbnail = itemEl.querySelector('media\\:thumbnail, thumbnail, thumbnail[url]');

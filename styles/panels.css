@@ -1,11 +1,6 @@
 .panel.sidebar-panel .panel-body {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  align-content: start;
-}
-
-.panel.sidebar-panel .panel-body > :nth-child(n + 3) {
-  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
 }
 
 .panel.header-strip {

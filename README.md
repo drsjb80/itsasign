@@ -209,7 +209,6 @@ The app includes a Puppeteer-based RSS server (`rss-server.js`) that:
 2. Server checks cache; if hit, returns instantly
 3. If cache miss, Puppeteer fetches the feed via Chrome, captures the raw HTTP response
 4. Result is cached and returned to client
-5. Client falls back to direct fetch and rss2json service if server is unavailable
 
 ## XKCD Widget
 

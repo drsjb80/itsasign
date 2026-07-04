@@ -23,10 +23,6 @@
     "durationMs": 10000,
     "fit": "cover"
   },
-  "layout": {
-    "columns": "2fr 1fr",
-    "rows": "160px 1fr"
-  },
   "panels": [
     {
       "className": "header-strip",
