@@ -56,7 +56,7 @@ export async function playItem(stage, item = {}, config = {}) {
   for (let start = 0; start < allItems.length; start += pageSize) {
     const pageItems = allItems.slice(start, start + pageSize);
     const pageDurationMs = itemDurationMs * pageItems.length;
-    showRssPage(stage, {
+    await showRssPage(stage, {
       title: item.title || feed.feed?.title || 'RSS Feed',
       url: feedUrl,
       source: feed.source || 'rss',
@@ -141,7 +141,14 @@ function parseRssXml(xmlText, fallbackUrl = '') {
   };
 }
 
-function showRssPage(stage, data) {
+async function showRssPage(stage, data) {
+  const existing = stage.querySelector('.playlist-slide');
+
+  if (existing) {
+    existing.classList.add('exiting');
+    await wait(500);
+  }
+
   stage.innerHTML = '';
 
   const slide = document.createElement('div');

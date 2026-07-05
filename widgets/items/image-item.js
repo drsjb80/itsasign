@@ -3,6 +3,13 @@ import { wait, reportWidgetError } from '../utils.js';
 const WIDGET_TYPE = 'playlist.image-item';
 
 export async function playItem(stage, item = {}, config = {}) {
+  const existing = stage.querySelector('.playlist-slide');
+
+  if (existing) {
+    existing.classList.add('exiting');
+    await wait(500);
+  }
+
   stage.innerHTML = '';
   const slide = document.createElement('div');
   slide.className = 'playlist-slide';
