@@ -16,7 +16,7 @@
     "fontScale": 2,
     "showQR": true,
     "showThumbnails": true,
-    "itemsPerPage": 2,
+    "itemsPerPage": 4,
     "maxItems": -1
   },
   "images": {
