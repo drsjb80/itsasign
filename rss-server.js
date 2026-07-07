@@ -3,7 +3,7 @@ const puppeteer = require('puppeteer');
 const url = require('url');
 const { execSync } = require('child_process');
 
-const PORT = process.env.RSS_SERVER_PORT || 3002;
+const PORT = process.env.RSS_SERVER_PORT || 3000;
 const RSS_PROXY_PORT = process.env.RSS_PROXY_PORT || 8080;
 
 async function ensureChromiumInstalled() {
