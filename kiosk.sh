@@ -18,9 +18,22 @@ fi
 
 cd "$PROJECT_DIR" || exit 1
 
+# --- Check if Docker is running ---
+if ! docker ps >/dev/null 2>&1; then
+    echo "ERROR: Docker is not running"
+    exit 1
+fi
+
+# --- Ensure npm dependencies are installed ---
+if [ ! -d "node_modules" ]; then
+    echo "Installing npm dependencies..."
+    npm ci || npm install
+fi
+
 # --- Rotate display if available ---
 if command -v wlr-randr >/dev/null 2>&1; then
-    wlr-randr --output HDMI-A-1 --transform 90 || true
+    wlr-randr --output $(wlr-randr | head -1 | sed -e 's/ .*//') --transform fli
+pped-90 || true
 fi
 
 # also: Alt-F4

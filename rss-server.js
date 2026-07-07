@@ -1,9 +1,31 @@
 const http = require('http');
 const puppeteer = require('puppeteer');
 const url = require('url');
+const { execSync } = require('child_process');
 
 const PORT = process.env.RSS_SERVER_PORT || 3002;
 const RSS_PROXY_PORT = process.env.RSS_PROXY_PORT || 8080;
+
+async function ensureChromiumInstalled() {
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+  if (executablePath) {
+    try {
+      execSync(`test -x "${executablePath}"`, { stdio: 'ignore' });
+      console.log(`✓ Using Chromium at: ${executablePath}`);
+      return;
+    } catch {
+      throw new Error(`Chromium not found at ${executablePath}`);
+    }
+  }
+
+  try {
+    await puppeteer.launch({ headless: true });
+    console.log('✓ Chromium is available');
+  } catch (e) {
+    console.error('✗ Chromium not installed. Run: npx puppeteer browsers install chrome');
+    throw e;
+  }
+}
 
 let browser = null;
 let browserStarting = false;
@@ -30,6 +52,9 @@ async function getBrowser() {
     while (browserStarting) {
       await new Promise(r => setTimeout(r, 100));
     }
+    if (!browser) {
+      throw new Error('Browser failed to start during initialization');
+    }
     return browser;
   }
 
@@ -39,9 +64,14 @@ async function getBrowser() {
       headless: 'new',
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
-  } finally {
+    if (!browser) {
+      throw new Error('Browser instance is null after launch');
+    }
+  } catch (e) {
     browserStarting = false;
+    throw e;
   }
+  browserStarting = false;
   return browser;
 }
 
@@ -139,9 +169,14 @@ const server = http.createServer(async (req, res) => {
   res.end(JSON.stringify({ error: 'Not found' }));
 });
 
-server.listen(PORT, () => {
-  console.log(`RSS Server running on http://localhost:${PORT}`);
-  console.log(`Proxy will be on http://localhost:${RSS_PROXY_PORT}`);
+ensureChromiumInstalled().then(() => {
+  server.listen(PORT, () => {
+    console.log(`RSS Server running on http://localhost:${PORT}`);
+    console.log(`Proxy will be on http://localhost:${RSS_PROXY_PORT}`);
+  });
+}).catch(e => {
+  console.error('Failed to start server:', e.message);
+  process.exit(1);
 });
 
 process.on('SIGINT', async () => {
