@@ -58,6 +58,9 @@ Then open `http://localhost:8080` in your browser.
 - The RSS server runs in Docker with Node 22 and Chromium, regardless of your host system's Node version
 - The web server runs locally on port 8080 and serves files from your project directory
 - RSS server communicates with the web server over `localhost:3000`
+- Two Dockerfiles are provided:
+  - `Dockerfile` — generic build using Debian's Chromium package; use on most hosts (x86_64, non-Pi arm64, CI)
+  - `Dockerfile.pi` — Raspberry Pi build; pulls Chromium from Raspberry Pi's apt repo, since vanilla Debian's arm64 Chromium build crashes on launch on Pi hardware. Build with `docker build -f Dockerfile.pi -t itsasign-rss:latest .`
 
 **Kiosk mode** (full screen on startup):
 
