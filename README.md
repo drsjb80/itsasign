@@ -60,7 +60,8 @@ Then open `http://localhost:8080` in your browser.
 - RSS server communicates with the web server over `localhost:3000`
 - Two Dockerfiles are provided:
   - `Dockerfile` — generic build using Debian's Chromium package; use on most hosts (x86_64, non-Pi arm64, CI)
-  - `Dockerfile.pi` — Raspberry Pi build; pulls Chromium from Raspberry Pi's apt repo, since vanilla Debian's arm64 Chromium build crashes on launch on Pi hardware. Build with `docker build -f Dockerfile.pi -t itsasign-rss:latest .`
+  - `Dockerfile.pi` — Raspberry Pi build; pulls Chromium from Raspberry Pi's apt repo, since vanilla Debian's arm64 Chromium build crashes on launch on Pi hardware. Build with `docker build -f Dockerfile.pi -t itsasign-rss:pi .`
+  - `kiosk.sh` detects Raspberry Pi hardware automatically (via `/proc/device-tree/model`) and builds/runs the matching image (`itsasign-rss:pi` vs `itsasign-rss:latest`) — no manual selection needed in kiosk mode
 
 **Kiosk mode** (full screen on startup):
 

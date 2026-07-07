@@ -31,14 +31,23 @@ docker stop itsasign-rss || true
 docker rm itsasign-rss || true
 pkill node || true
 
+# --- Pick Dockerfile/image tag based on hardware ---
+if tr -d '\0' < /proc/device-tree/model 2>/dev/null | grep -qi "raspberry pi"; then
+    DOCKERFILE="Dockerfile.pi"
+    IMAGE_TAG="itsasign-rss:pi"
+else
+    DOCKERFILE="Dockerfile"
+    IMAGE_TAG="itsasign-rss:latest"
+fi
+
 # --- Build Docker image if needed ---
-if ! docker image inspect itsasign-rss:latest >/dev/null 2>&1; then
-    echo "Building Docker image..."
-    docker build -t itsasign-rss:latest . >> /tmp/docker-build.log 2>&1
+if ! docker image inspect "$IMAGE_TAG" >/dev/null 2>&1; then
+    echo "Building Docker image ($DOCKERFILE)..."
+    docker build -f "$DOCKERFILE" -t "$IMAGE_TAG" . >> /tmp/docker-build.log 2>&1
 fi
 
 # --- Start RSS server in Docker ---
-docker run -d -p 3000:3000 --name itsasign-rss itsasign-rss:latest >> /tmp/rss-server.log 2>&1
+docker run -d -p 3000:3000 --name itsasign-rss "$IMAGE_TAG" >> /tmp/rss-server.log 2>&1
 
 # --- Start web server ---
 npm run serve >> /tmp/web-server.log 2>&1 &
