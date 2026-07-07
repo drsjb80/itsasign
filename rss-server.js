@@ -68,7 +68,9 @@ async function getBrowser() {
         '--disable-dev-shm-usage',
         '--disable-gpu',
         '--no-first-run',
-        '--disable-extensions'
+        '--disable-extensions',
+        '--disable-crash-reporter',
+        '--disable-breakpad'
       ]
     });
     if (!browser) {

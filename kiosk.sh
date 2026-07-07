@@ -32,8 +32,7 @@ fi
 
 # --- Rotate display if available ---
 if command -v wlr-randr >/dev/null 2>&1; then
-    wlr-randr --output $(wlr-randr | head -1 | sed -e 's/ .*//') --transform fli
-pped-90 || true
+    wlr-randr --output $(wlr-randr | head -1 | sed -e 's/ .*//') --transform flipped-90 || true
 fi
 
 # also: Alt-F4
