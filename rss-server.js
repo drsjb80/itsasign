@@ -9,6 +9,7 @@ const RSS_PROXY_PORT = process.env.RSS_PROXY_PORT || 8080;
 let browser = null;
 let browserStarting = false;
 const cache = new Map();
+const resourceCache = new Map();
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 function getCachedContent(url) {
@@ -23,6 +24,46 @@ function getCachedContent(url) {
 
 function setCacheContent(url, content) {
   cache.set(url, { content, timestamp: Date.now() });
+}
+
+function getCachedResource(url) {
+  const cached = resourceCache.get(url);
+  if (!cached) return null;
+  if (Date.now() - cached.timestamp > CACHE_TTL_MS) {
+    resourceCache.delete(url);
+    return null;
+  }
+  return cached;
+}
+
+function setCachedResource(url, buffer, contentType) {
+  resourceCache.set(url, { buffer, contentType, timestamp: Date.now() });
+}
+
+async function fetchResource(resourceUrl, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const response = await fetch(resourceUrl, {
+      signal: controller.signal,
+      headers: {
+        'User-Agent':
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'Referer': new url.URL(resourceUrl).origin
+      }
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    const buffer = Buffer.from(await response.arrayBuffer());
+    return { buffer, contentType };
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 async function getBrowser() {
@@ -106,7 +147,7 @@ const server = http.createServer(async (req, res) => {
     const feedUrl = parsedUrl.query.url;
 
     if (!feedUrl) {
-      console.error(`  Missing URL parameter. Query:`, parsedUrl.query);
+      console.error('  Missing URL parameter. Query:', parsedUrl.query);
       res.writeHead(400);
       res.end(JSON.stringify({ error: 'Missing url parameter' }));
       return;
@@ -128,6 +169,40 @@ const server = http.createServer(async (req, res) => {
       console.log(`  ✓ Success (${content.length} bytes)`);
       res.writeHead(200, { 'Content-Type': 'text/xml' });
       res.end(content);
+    } catch (error) {
+      console.error(`  ✗ Error: ${error.message}`);
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    return;
+  }
+
+  if (pathname === '/fetch-url' && req.method === 'GET') {
+    const resourceUrl = parsedUrl.query.url;
+
+    if (!resourceUrl) {
+      console.error('  Missing URL parameter. Query:', parsedUrl.query);
+      res.writeHead(400);
+      res.end(JSON.stringify({ error: 'Missing url parameter' }));
+      return;
+    }
+
+    const cached = getCachedResource(resourceUrl);
+    if (cached) {
+      console.log(`  ✓ Cached resource (${cached.buffer.length} bytes)`);
+      res.writeHead(200, { 'Content-Type': cached.contentType });
+      res.end(cached.buffer);
+      return;
+    }
+
+    console.log(`  Fetching resource: ${resourceUrl}`);
+
+    try {
+      const { buffer, contentType } = await fetchResource(resourceUrl);
+      setCachedResource(resourceUrl, buffer, contentType);
+      console.log(`  ✓ Success (${buffer.length} bytes)`);
+      res.writeHead(200, { 'Content-Type': contentType });
+      res.end(buffer);
     } catch (error) {
       console.error(`  ✗ Error: ${error.message}`);
       res.writeHead(500, { 'Content-Type': 'application/json' });

@@ -209,7 +209,7 @@ async function showRssPage(stage, data) {
       if (item.thumbnailUrl) {
         const thumb = document.createElement('img');
         thumb.className = 'rss-thumb';
-        thumb.src = item.thumbnailUrl;
+        thumb.src = buildResourceProxyUrl(item.thumbnailUrl);
         thumb.alt = item.title ? `Thumbnail for ${item.title}` : 'RSS item thumbnail';
         thumb.loading = 'lazy';
         thumb.onerror = () => {
@@ -285,6 +285,10 @@ function resolveShowQR(item = {}, config = {}) {
 
 function buildQrUrl(value, size = 120) {
   return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodeURIComponent(value)}`;
+}
+
+function buildResourceProxyUrl(resourceUrl) {
+  return `http://localhost:3000/fetch-url?url=${encodeURIComponent(resourceUrl)}`;
 }
 
 function stripHtml(html) {
