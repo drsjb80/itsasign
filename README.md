@@ -60,8 +60,16 @@ Then open `http://localhost:8080` in your browser.
 - RSS server communicates with the web server over `localhost:3000`
 - Two Dockerfiles are provided:
   - `Dockerfile` — generic build using Debian's Chromium package; use on most hosts (x86_64, non-Pi arm64, CI)
-  - `Dockerfile.pi` — Raspberry Pi build; pulls Chromium from Raspberry Pi's apt repo, since vanilla Debian's arm64 Chromium build crashes on launch on Pi hardware. Build with `docker build -f Dockerfile.pi -t itsasign-rss:pi .`
+  - `Dockerfile.pi` — Raspberry Pi build; pulls Chromium from Raspberry Pi's apt repo, since vanilla Debian's arm64 Chromium build crashes on launch on Pi hardware
   - `kiosk.sh` detects Raspberry Pi hardware automatically (via `/proc/device-tree/model`) and builds/runs the matching image (`itsasign-rss:pi` vs `itsasign-rss:latest`) — no manual selection needed in kiosk mode
+
+**Building the images:**
+
+    # Generic build (x86_64, non-Pi arm64, CI)
+    docker build -f Dockerfile -t itsasign-rss:latest .
+
+    # Raspberry Pi build
+    docker build -f Dockerfile.pi -t itsasign-rss:pi .
 
 **Kiosk mode** (full screen on startup):
 
@@ -214,7 +222,7 @@ The weather widget uses Open-Meteo and now supports current conditions and a dai
 
 ## RSS Feed Server
 
-The app includes a Puppeteer-based RSS server (`rss-server.js`) that:
+The app includes a Puppeteer-based fetch proxy server (`fetch-proxy-server.js`) that:
 
 - Fetches RSS feeds via a real browser, bypassing bot detection (Cloudflare, etc.)
 - Caches responses for 24 hours (configurable via `CACHE_TTL_MS`)

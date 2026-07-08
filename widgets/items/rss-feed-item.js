@@ -343,7 +343,7 @@ function extractThumbnailFromXmlItem(itemEl) {
     return descriptionImage;
   }
 
-  const encodedHtml = itemEl.querySelector('content\\:encoded')?.textContent || '';
+  const encodedHtml = itemEl.getElementsByTagName('content:encoded')[0]?.textContent || '';
   const encodedImage = extractFirstImageFromHtml(encodedHtml);
   if (encodedImage) {
     return encodedImage;
