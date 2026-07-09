@@ -47,7 +47,7 @@ if ! docker image inspect "$IMAGE_TAG" >/dev/null 2>&1; then
 fi
 
 # --- Start RSS server in Docker ---
-docker run -d -p 3000:3000 --name itsasign-rss "$IMAGE_TAG" >> /tmp/fetch-proxy-server.log 2>&1
+docker run -d -p 3000:3000 --name itsasign-rss "$IMAGE_TAG" >> /tmp/proxy-server.log 2>&1
 
 # --- Start web server ---
 npm run serve >> /tmp/web-server.log 2>&1 &

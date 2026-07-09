@@ -40,9 +40,18 @@ function setCachedResource(url, buffer, contentType) {
   resourceCache.set(url, { buffer, contentType, timestamp: Date.now() });
 }
 
+function logError(label, error) {
+  console.error(`  ✗ ${label}: ${error.message}`);
+  if (error.stack) console.error(error.stack);
+  if (error.cause) console.error('  Cause:', error.cause);
+}
+
 async function fetchResource(resourceUrl, timeoutMs = 15000) {
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  const start = Date.now();
+
+  console.log(`  [fetch-url] GET ${resourceUrl}`);
 
   try {
     const response = await fetch(resourceUrl, {
@@ -54,13 +63,24 @@ async function fetchResource(resourceUrl, timeoutMs = 15000) {
       }
     });
 
+    const elapsed = Date.now() - start;
+    console.log(
+      `  [fetch-url] <- ${response.status} ${response.statusText} ` +
+      `(${elapsed}ms) content-type=${response.headers.get('content-type')} ` +
+      `content-length=${response.headers.get('content-length')} url=${resourceUrl}`
+    );
+
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+      throw new Error(`HTTP ${response.status} ${response.statusText} for ${resourceUrl}`);
     }
 
     const contentType = response.headers.get('content-type') || 'application/octet-stream';
     const buffer = Buffer.from(await response.arrayBuffer());
     return { buffer, contentType };
+  } catch (error) {
+    const elapsed = Date.now() - start;
+    console.error(`  [fetch-url] FAILED after ${elapsed}ms for ${resourceUrl}`);
+    throw error;
   } finally {
     clearTimeout(timeout);
   }
@@ -69,6 +89,7 @@ async function fetchResource(resourceUrl, timeoutMs = 15000) {
 async function getBrowser() {
   if (browser) return browser;
   if (browserStarting) {
+    console.log('  [browser] launch already in progress, waiting...');
     while (browserStarting) {
       await new Promise(r => setTimeout(r, 100));
     }
@@ -76,11 +97,21 @@ async function getBrowser() {
   }
 
   browserStarting = true;
+  const start = Date.now();
+  console.log('  [browser] launching puppeteer...');
   try {
     browser = await puppeteer.launch({
       headless: 'new',
       args: ['--no-sandbox', '--disable-setuid-sandbox']
     });
+    browser.on('disconnected', () => {
+      console.error('  [browser] disconnected/crashed, will relaunch on next request');
+      browser = null;
+    });
+    console.log(`  [browser] launched in ${Date.now() - start}ms (pid ${browser.process()?.pid})`);
+  } catch (error) {
+    logError('browser launch failed', error);
+    throw error;
   } finally {
     browserStarting = false;
   }
@@ -88,18 +119,32 @@ async function getBrowser() {
 }
 
 async function fetchRssWithPuppeteer(feedUrl, timeoutMs = 15000) {
+  const start = Date.now();
+  console.log(`  [puppeteer] GET ${feedUrl}`);
+
   const b = await getBrowser();
   const page = await b.newPage();
   let responseBody = null;
+  let mainResponseStatus = null;
 
-  await page.on('response', async (response) => {
+  page.on('response', async (response) => {
+    console.log(`  [puppeteer]   <- ${response.status()} ${response.url()}`);
     if (response.url() === feedUrl) {
+      mainResponseStatus = response.status();
       try {
         responseBody = await response.buffer();
       } catch (e) {
-        // Response might not be bufferable, continue
+        console.error(`  [puppeteer]   could not buffer response body for ${feedUrl}: ${e.message}`);
       }
     }
+  });
+
+  page.on('requestfailed', (request) => {
+    console.error(`  [puppeteer]   request failed: ${request.url()} (${request.failure()?.errorText})`);
+  });
+
+  page.on('console', (msg) => {
+    console.log(`  [puppeteer]   page console [${msg.type()}]: ${msg.text()}`);
   });
 
   try {
@@ -107,14 +152,24 @@ async function fetchRssWithPuppeteer(feedUrl, timeoutMs = 15000) {
       'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
     );
 
-    await page.goto(feedUrl, { waitUntil: 'networkidle2', timeout: timeoutMs });
+    const navResponse = await page.goto(feedUrl, { waitUntil: 'networkidle2', timeout: timeoutMs });
+    console.log(
+      `  [puppeteer] navigation status=${navResponse ? navResponse.status() : '(none)'} ` +
+      `mainResponseStatus=${mainResponseStatus} elapsed=${Date.now() - start}ms`
+    );
 
     if (responseBody) {
+      console.log(`  [puppeteer] using buffered response body (${responseBody.length} bytes)`);
       return responseBody.toString('utf-8');
     }
 
+    console.log('  [puppeteer] no buffered response body, falling back to page.content()');
     const content = await page.content();
+    console.log(`  [puppeteer] page.content() length=${content.length}`);
     return content;
+  } catch (error) {
+    console.error(`  [puppeteer] FAILED after ${Date.now() - start}ms for ${feedUrl}`);
+    throw error;
   } finally {
     await page.close();
   }
@@ -124,7 +179,7 @@ const server = http.createServer(async (req, res) => {
   const parsedUrl = url.parse(req.url, true);
   const pathname = parsedUrl.pathname;
 
-  console.log(`[${new Date().toISOString()}] ${req.method} ${pathname}`);
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
 
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
@@ -155,22 +210,22 @@ const server = http.createServer(async (req, res) => {
 
     const cached = getCachedContent(feedUrl);
     if (cached) {
-      console.log(`  ✓ Cached (${cached.length} bytes)`);
+      console.log(`  ✓ Cached: ${feedUrl} (${cached.length} bytes)`);
       res.writeHead(200, { 'Content-Type': 'text/xml' });
       res.end(cached);
       return;
     }
 
-    console.log(`  Fetching: ${feedUrl}`);
+    console.log(`  Fetching (not cached): ${feedUrl}`);
 
     try {
       const content = await fetchRssWithPuppeteer(feedUrl);
       setCacheContent(feedUrl, content);
-      console.log(`  ✓ Success (${content.length} bytes)`);
+      console.log(`  ✓ Success: ${feedUrl} (${content.length} bytes)`);
       res.writeHead(200, { 'Content-Type': 'text/xml' });
       res.end(content);
     } catch (error) {
-      console.error(`  ✗ Error: ${error.message}`);
+      logError(`Error fetching ${feedUrl}`, error);
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: error.message }));
     }
@@ -189,22 +244,22 @@ const server = http.createServer(async (req, res) => {
 
     const cached = getCachedResource(resourceUrl);
     if (cached) {
-      console.log(`  ✓ Cached resource (${cached.buffer.length} bytes)`);
+      console.log(`  ✓ Cached resource: ${resourceUrl} (${cached.buffer.length} bytes)`);
       res.writeHead(200, { 'Content-Type': cached.contentType });
       res.end(cached.buffer);
       return;
     }
 
-    console.log(`  Fetching resource: ${resourceUrl}`);
+    console.log(`  Fetching resource (not cached): ${resourceUrl}`);
 
     try {
       const { buffer, contentType } = await fetchResource(resourceUrl);
       setCachedResource(resourceUrl, buffer, contentType);
-      console.log(`  ✓ Success (${buffer.length} bytes)`);
+      console.log(`  ✓ Success: ${resourceUrl} (${buffer.length} bytes, ${contentType})`);
       res.writeHead(200, { 'Content-Type': contentType });
       res.end(buffer);
     } catch (error) {
-      console.error(`  ✗ Error: ${error.message}`);
+      logError(`Error fetching resource ${resourceUrl}`, error);
       res.writeHead(500, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify({ error: error.message }));
     }

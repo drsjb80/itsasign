@@ -8,9 +8,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# Copy package files and fetch-proxy-server
+# Copy package files and proxy server
 COPY package*.json ./
-COPY fetch-proxy-server.js ./
+COPY proxy-server.js ./
 
 # Install dependencies, skip Puppeteer download
 RUN PUPPETEER_SKIP_DOWNLOAD=true npm ci --omit=dev
@@ -23,4 +23,4 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 ENV RSS_SERVER_PORT=3000
 
 # Start only the fetch-proxy/Puppeteer server
-CMD ["node", "fetch-proxy-server.js"]
+CMD ["node", "proxy-server.js"]

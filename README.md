@@ -46,7 +46,11 @@ ItsaSign is an extensible digital signage application that renders configurable 
 **Development** (two terminals):
 
     # Terminal 1: Build and run RSS server in Docker (port 3000)
-    docker build -t itsasign-rss:latest .
+    docker build -f Dockerfile -t itsasign-rss:latest .
+    ## or
+    docker build -f Dockerfile.pi -t itsasign-rss:latest .
+    ## see below
+
     docker run -d -p 3000:3000 --name itsasign-rss itsasign-rss:latest
 
     # Terminal 2: Web server (port 8080)
@@ -69,7 +73,7 @@ Then open `http://localhost:8080` in your browser.
     docker build -f Dockerfile -t itsasign-rss:latest .
 
     # Raspberry Pi build
-    docker build -f Dockerfile.pi -t itsasign-rss:pi .
+    docker build -f Dockerfile.pi -t itsasign-rss:latest .
 
 **Kiosk mode** (full screen on startup):
 
@@ -222,7 +226,7 @@ The weather widget uses Open-Meteo and now supports current conditions and a dai
 
 ## RSS Feed Server
 
-The app includes a Puppeteer-based fetch proxy server (`fetch-proxy-server.js`) that:
+The app includes a Puppeteer-based fetch proxy server (`proxy-server.js`) that:
 
 - Fetches RSS feeds via a real browser, bypassing bot detection (Cloudflare, etc.)
 - Caches responses for 24 hours (configurable via `CACHE_TTL_MS`)
@@ -286,7 +290,12 @@ For full step-by-step instructions and templates, see `WIDGET.md`.
 - Check browser console (`F12` → Console tab) for fetch errors.
 - Check container logs: `docker logs itsasign-rss`
 - RSS feeds are cached for 24 hours; to force a refresh, restart the container: `docker restart itsasign-rss`
-- If a feed still fails, test it directly: `curl "http://localhost:3000/fetch-rss?url=<feed-url>"`
+- If a feed still fails, test it directly against the proxy, then check `docker logs itsasign-rss` for the detailed request/response trace:
+
+    ```bash
+    curl -G "http://localhost:3000/fetch-rss" \
+      --data-urlencode "url=https://cacm.acm.org/category/artificial-intelligence-machine-learning/feed/"
+    ```
 
 ### 3. `Unknown widget type` appears
 

@@ -24,7 +24,7 @@
     "test:coverage": "jest --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "dev": "node fetch-proxy-server.js",
+    "dev": "node proxy-server.js",
     "serve": "serve -p 8080"
   },
   "dependencies": {
