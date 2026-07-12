@@ -33,7 +33,6 @@
             {
               "type": "image",
               "title": "Header",
-              "src": "images/CS_Largecopy.jpg",
               "durationMs": 60000,
               "fit": "contain"
             }
