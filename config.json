@@ -33,6 +33,7 @@
             {
               "type": "image",
               "title": "Header",
+              "src": "images/CS_Largecopy.jpg",
               "durationMs": 60000,
               "fit": "contain"
             }
@@ -74,6 +75,11 @@
               "type": "rss-feed",
               "title": "SE and Languages",
               "url": "https://cacm.acm.org/category/software-engineering-and-programming-languages/feed/"
+            },
+            {
+              "type": "xkcd",
+              "title": "XKCD",
+              "durationMs": 10000
             },
             {
               "type": "rss-feed",
@@ -122,6 +128,10 @@
         {
           "type": "qotd",
           "title": "Quote of the Day"
+        },
+        {
+          "type": "xkcd",
+          "title": "XKCD"
         }
       ]
     }

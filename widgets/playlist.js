@@ -1,12 +1,14 @@
 import { createCard, escapeHtml, reportWidgetError } from './utils.js';
 import * as imageItem from './items/image-item.js';
 import * as rssFeedItem from './items/rss-feed-item.js';
+import * as xkcdItem from './items/xkcd-item.js';
 
 export const type = 'playlist';
 
 const ITEM_PLAYERS = {
   'image': imageItem,
-  'rss-feed': rssFeedItem
+  'rss-feed': rssFeedItem,
+  'xkcd': xkcdItem
 };
 
 export function create(widget, config) {
@@ -76,7 +78,8 @@ export function create(widget, config) {
 function getItemTypeLabel(type) {
   const labels = {
     'image': 'Image',
-    'rss-feed': 'RSS'
+    'rss-feed': 'RSS',
+    'xkcd': 'XKCD'
   };
   return labels[type] || type;
 }
