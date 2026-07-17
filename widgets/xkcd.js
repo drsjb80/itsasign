@@ -21,7 +21,8 @@ export function create(widget) {
 
   async function render() {
     try {
-      const json = await fetch('https://xkcd.com/info.0.json').then(r => r.json());
+      const proxyUrl = `http://localhost:3000/fetch-url?url=${encodeURIComponent('https://xkcd.com/info.0.json')}`;
+      const json = await fetch(proxyUrl).then(r => r.json());
 
       image.src = json.img;
       image.onerror = () => {

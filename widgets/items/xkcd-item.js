@@ -6,7 +6,8 @@ const WIDGET_TYPE = 'playlist.xkcd-item';
 export async function playItem(stage, item = {}, config = {}) {
   let comic;
   try {
-    comic = await fetch('https://xkcd.com/info.0.json').then(r => r.json());
+    const proxyUrl = `http://localhost:3000/fetch-url?url=${encodeURIComponent('https://xkcd.com/info.0.json')}`;
+    comic = await fetch(proxyUrl).then(r => r.json());
   } catch (error) {
     reportWidgetError({
       widgetType: WIDGET_TYPE,
