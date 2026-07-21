@@ -36,6 +36,10 @@ export async function playItem(stage, item = {}, config = {}) {
   stage.appendChild(slide);
 
   const duration = resolveDurationMs(item, config);
+  if (duration === Infinity) {
+    await new Promise(() => {});
+    return;
+  }
   await wait(duration);
 }
 
@@ -45,6 +49,9 @@ function resolveDurationMs(item = {}, config = {}) {
     ?? 10000;
 
   const durationMs = Number(raw);
+  if (durationMs === 0) {
+    return Infinity;
+  }
   return Number.isFinite(durationMs) && durationMs > 0 ? durationMs : 10000;
 }
 

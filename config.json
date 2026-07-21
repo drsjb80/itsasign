@@ -34,7 +34,7 @@
               "type": "image",
               "title": "Header",
               "src": "images/CS_Largecopy.jpg",
-              "durationMs": 60000,
+              "durationMs": 0,
               "fit": "contain"
             }
           ]
@@ -57,8 +57,7 @@
             {
               "type": "image",
               "title": "Toby",
-              "src": "http://sites.msudenver.edu/beatys/wp-content/uploads/sites/461/2026/04/Toby-scaled.png",
-              "durationMs": 10000
+              "src": "http://sites.msudenver.edu/beatys/wp-content/uploads/sites/461/2026/04/Toby-scaled.png"
             },
             {
               "type": "rss-feed",
@@ -73,8 +72,7 @@
             {
               "type": "image",
               "title": "NOAA",
-              "src": "https://www.wpc.ncep.noaa.gov/noaa/noaa.gif",
-              "durationMs": 10000
+              "src": "https://www.wpc.ncep.noaa.gov/noaa/noaa.gif"
             },
             {
               "type": "rss-feed",
