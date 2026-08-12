@@ -20,7 +20,7 @@ cd "$PROJECT_DIR" || exit 1
 
 # --- Rotate display if available ---
 if command -v wlr-randr >/dev/null 2>&1; then
-    wlr-randr --output HDMI-A-1 --transform 90 || true
+    wlr-randr --output HDMI-A-2 --transform 90 || true
 fi
 
 # also: Alt-F4
