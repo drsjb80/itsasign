@@ -24,7 +24,7 @@ if command -v wlr-randr >/dev/null 2>&1; then
     # or: [[ -f ~/TRANSFORM ]] && TRANSFORM=$(cat ~/TRANSFORM) || TRANSFORM=''
     # or: TRANSFORM=$(cat ~/TRANSFORM 2>&1 || echo)
 
-    wlr-randr --output HDMI-A-1 "$TRANSFORM" || true
+    wlr-randr --output $(wlr-randr | head -1 | sed -e 's/ .*$//') "$TRANSFORM" || true
 fi
 
 # also: Alt-F4
