@@ -1,7 +1,6 @@
 const http = require('http');
 const puppeteer = require('puppeteer');
 const url = require('url');
-const querystring = require('querystring');
 
 const PORT = process.env.RSS_SERVER_PORT || 3002;
 const RSS_PROXY_PORT = process.env.RSS_PROXY_PORT || 8080;

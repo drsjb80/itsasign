@@ -66,6 +66,11 @@
             },
             {
               "type": "rss-feed",
+              "title": "BBC World News",
+              "url": "https://feeds.bbci.co.uk/news/world/rss.xml"
+            },
+            {
+              "type": "rss-feed",
               "title": "Computing and Society",
               "url": "https://cacm.acm.org/category/society/feed/"
             },
